@@ -1,11 +1,10 @@
 'use strict';
 
 var http = require('http'),
-	url = require('url'),
 	cluster = require('cluster'),
 	os = require('os'),
 	helpers = require('./helpers'),
-	router = require('./router');
+	processRequest = require('./processRequest');
 
 function HttpServer (opts) {
 	this.defaults = {
@@ -20,7 +19,6 @@ function HttpServer (opts) {
 		put: {},
 		delete: {}
 	};
-
 
 	this.init(opts);
 }
@@ -40,11 +38,8 @@ HttpServer.prototype.start = function () {
 	else {
 		console.log('server was started on process ' + process.pid);
 		http.Server(function (request, response) {				
-			var pathname = url.parse(request.url).pathname,
-				method = request.method.toLowerCase();
 
-			pathname = helpers.trimStr(pathname, "\/");
-			router.route(pathname, method, self.handlers, self.options.publicFolder, request, response);
+			processRequest(request, response, self.handlers, self.options.publicFolder);
 
 		}).listen(this.options.port, this.options.host);			
 	}

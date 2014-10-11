@@ -1,12 +1,13 @@
 'use strict';
 
 var responces = require('./responces'),
+	helpers = require('./helpers'),
 	fs = require('fs');
 
 var paramRefExp = /{(\w+)}/g,
 	fileRegExp = /(.*)(\w+\.\w+)$/;
 
-exports.route = function (pathname, method, handlers, publicFolder, request, response) {
+exports.route = function (request, response, pathname, method, handlers, publicFolder, data) {
 	if ( handlers[method] ) {
 		for ( var path in handlers[method] ) {
 			// get path params from the query pattern
@@ -26,13 +27,13 @@ exports.route = function (pathname, method, handlers, publicFolder, request, res
 				}
 
 				// process request
-				handlers[method][path](request, response);
+				handlers[method][path](request, response, helpers.extend(pathParams, data));
 				return;
 			}
 		}
 
 		// check is need a file
-		if ( fileRegExp.test('/' + pathname) ) {
+		if ( method == 'get' && fileRegExp.test('/' + pathname) ) {
 			// trying to find file in the public folder
 
 			//check is file exist

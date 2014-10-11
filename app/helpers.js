@@ -7,9 +7,14 @@
 			obj1 = obj1 || {};
 			obj2 = obj2 || {};
 
-			var result = obj2;
+			var result = {},
+				opt = null;
 
-			for ( var opt in obj1 ) {
+			for ( opt in obj2 ) {
+				result[opt] = obj2[opt];
+			}
+
+			for ( opt in obj1 ) {
 				result[opt] = obj1[opt];
 			}
 

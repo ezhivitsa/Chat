@@ -5,8 +5,12 @@ var HttpServer = require('./httpServer'),
 	server = new HttpServer(),
 	db = new Db();
 
-server.get('user/id/{userId}/file/id/{fileId}', function () {
+server.get('user/id/{userId}', function (request, response, data) {
+	console.log('get', data)
+});
 
+server.post('user/id/{userId}', function (request, response, data) {
+	console.log('post', data)
 });
 
 server.start();

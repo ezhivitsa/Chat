@@ -7,7 +7,7 @@ var responces = require('./responces'),
 var paramRefExp = /{(\w+)}/g,
 	fileRegExp = /(.*)(\w+\.\w+)$/;
 
-exports.route = function (request, response, pathname, method, handlers, publicFolder, data) {
+exports.route = function (request, response, pathname, method, handlers, publicFolder, data, session) {
 	if ( handlers[method] ) {
 		for ( var path in handlers[method] ) {
 			// get path params from the query pattern
@@ -27,7 +27,7 @@ exports.route = function (request, response, pathname, method, handlers, publicF
 				}
 
 				// process request
-				handlers[method][path](request, response, helpers.extend(pathParams, data));
+				handlers[method][path](request, response, helpers.extend(pathParams, data), session);
 				return;
 			}
 		}

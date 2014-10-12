@@ -3,13 +3,19 @@
 var HttpServer = require('./httpServer'),
 	Db = require('./db'),
 	server = new HttpServer(),
-	db = new Db();
+	db = new Db(),
+	User = require('./models/user');
 
-server.get('user/id/{userId}', function (request, response, data) {
+server.post('login', function (request, response, data, session) {
+	var user = new User(db, request, session, data);
+	user.login();
+});
+
+server.get('user/id/{userId}', function (request, response, data, session) {
 	console.log('get', data)
 });
 
-server.post('user/id/{userId}', function (request, response, data) {
+server.post('user/id/{userId}', function (request, response, data, session) {
 	console.log('post', data)
 });
 

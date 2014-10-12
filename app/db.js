@@ -26,7 +26,7 @@ Db.prototype.connect = function () {
 	}
 	connectString += this.options.host + ':' + this.options.port + '/' + this.options.dbName;
 
-	mongoose.connect( connectString )
+	mongoose.connect( connectString );
 }
 
 Db.prototype.disconnect = function () {

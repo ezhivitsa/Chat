@@ -23,6 +23,14 @@
 		trimStr: function (str, strExp) {
 			str = str || "";
 			return str.replace(new RegExp("^" + strExp + "+|" + strExp + "+$", 'g'), '');
+		},
+		// set options in first oject that exist in array shema and in second object
+		setShemaData: function (schema, obj1, obj2) {
+			for ( var opt in obj2 ) {
+				if ( schema.indexOf(opt) + 1 ) {
+					obj1[opt] = obj2;
+				}
+			}
 		}
 	};
 

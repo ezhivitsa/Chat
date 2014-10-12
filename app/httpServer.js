@@ -2,6 +2,8 @@
 
 var http = require('http'),
 	cluster = require('cluster'),
+	cs = require('client-session'),
+    clientSession = cs('mysecretkey'),
 	os = require('os'),
 	helpers = require('./helpers'),
 	processRequest = require('./processRequest');
@@ -39,7 +41,8 @@ HttpServer.prototype.start = function () {
 		console.log('server was started on process ' + process.pid);
 		http.Server(function (request, response) {				
 
-			processRequest(request, response, self.handlers, self.options.publicFolder);
+			clientSession.csget(request, response);
+			processRequest(request, response, self.handlers, self.options.publicFolder, session);
 
 		}).listen(this.options.port, this.options.host);			
 	}

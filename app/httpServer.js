@@ -12,7 +12,8 @@ function HttpServer (opts) {
 	this.defaults = {
 		host: '127.0.0.1',
 		port: 5555,
-		publicFolder: "./public"
+		publicFolder: "./public",		
+		defaultFile: 'index.html'
 	};
 
 	this.handlers = {
@@ -42,7 +43,7 @@ HttpServer.prototype.start = function () {
 		http.Server(function (request, response) {				
 
 			clientSession.csget(request, response);
-			processRequest(request, response, self.handlers, self.options.publicFolder, session);
+			processRequest(request, response, clientSession, self.handlers, self.options.publicFolder, self.options.defaultFile);
 
 		}).listen(this.options.port, this.options.host);			
 	}

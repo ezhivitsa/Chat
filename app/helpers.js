@@ -28,7 +28,7 @@
 		setShemaData: function (schema, obj1, obj2) {
 			for ( var opt in obj2 ) {
 				if ( schema.indexOf(opt) + 1 ) {
-					obj1[opt] = obj2;
+					obj1[opt] = obj2[opt];
 				}
 			}
 		}

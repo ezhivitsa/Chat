@@ -7,7 +7,7 @@ var responces = require('./responces'),
 var paramRefExp = /{(\w+)}/g,
 	fileRegExp = /(.*)(\w+\.\w+)$/;
 
-exports.route = function (request, response, pathname, method, handlers, publicFolder, data, session) {
+exports.route = function (request, response, session, pathname, method, handlers, publicFolder, defaultFile, data) {
 	if ( handlers[method] ) {
 		for ( var path in handlers[method] ) {
 			// get path params from the query pattern
@@ -15,7 +15,7 @@ exports.route = function (request, response, pathname, method, handlers, publicF
 				match = null,
 				pathRegString = path.replace(paramRefExp, "(\\w+)"),
 				pathReg = new RegExp(pathRegString);
-
+				
 			if ( pathReg.test(pathname) ) {
 				// url is the same as the pattern
 				// finding path params
@@ -33,8 +33,10 @@ exports.route = function (request, response, pathname, method, handlers, publicF
 		}
 
 		// check is need a file
-		if ( method == 'get' && fileRegExp.test('/' + pathname) ) {
+		if ( method == 'get' && ( fileRegExp.test('/' + pathname) || pathname === '' ) ) {
 			// trying to find file in the public folder
+
+			pathname = pathname || defaultFile;
 
 			//check is file exist
 			fs.exists(publicFolder + '/' + pathname, function (exists) {

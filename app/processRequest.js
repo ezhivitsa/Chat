@@ -5,7 +5,7 @@ var url = require('url'),
 	helpers = require('./helpers'),
 	router = require('./router');
 
-module.exports = function (request, response, handlers, publicFolder, session) {
+module.exports = function (request, response, session, handlers, publicFolder, defaultFile) {
 	var pathname = url.parse(request.url).pathname,
 		method = request.method.toLowerCase();
 
@@ -15,7 +15,7 @@ module.exports = function (request, response, handlers, publicFolder, session) {
 		// process get method
 		var queryData = url.parse(request.url, true).query;
 
-		router.route(request, response, pathname, method, handlers, publicFolder, queryData, session);
+		router.route(request, response, session, pathname, method, handlers, publicFolder, defaultFile, queryData);
 	}
 	else {
 		// process post, put and delete
@@ -25,7 +25,7 @@ module.exports = function (request, response, handlers, publicFolder, session) {
 		});
 
 		request.on("end", function() {
-			router.route(request, response, pathname, method, handlers, publicFolder, querystring.parse(postData), session);
+			router.route(request, response, session, pathname, method, handlers, publicFolder, defaultFile, querystring.parse(postData));
 		});
 	}
 };

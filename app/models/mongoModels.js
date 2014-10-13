@@ -3,41 +3,47 @@
 var mongoose = require('mongoose'),
 	Schema = mongoose.Schema;
 
-module.exports = {
+var modelsAndSchemas = {
 	schemas: {
 		user: new Schema({
-			collection: 'users',
 			name: String,
 			token: String,
 			lastActivity: { type: Date, default: Date.now }
+		}, {
+			collection: 'users'
 		}),
 		publicMessage: new Schema({
-			collection: 'publicMessages',
-			author: [{
-				id: ObjectId,
+			author: {
+				id: Schema.Types.ObjectId,
 				name: String
-			}],
+			},
 			message: String,
 			time: { type: Date, default: Date.now }
+		}, {
+			collection: 'publicMessages'
 		}),
 		privateMessage: new Schema({
-			collection: 'privateMessages',
-			author: [{
-				id: ObjectId,
+			author: {
+				id: Schema.Types.ObjectId,
 				name: String
-			}],
-			recipient: [{
-				id: ObjectId,
+			},
+			recipient: {
+				id: Schema.Types.ObjectId,
 				name: String
-			}]
+			},
 			message: String,
 			time: { type: Date, default: Date.now },
 			isRead: Boolean
+		}, {
+			collection: 'privateMessages'
 		}),
 	},
-	models: {
-		User: mongoose.model('User', this.schemas.user),
-		PublicMessage: mongoose.model('PublicMessage', this.schemas.publicMessage),
-		privateMessage: mongoose.model('PrivateMessage', this.schemas.privateMessage)
-	}
+	models: {}
 };
+
+
+modelsAndSchemas.models.User = mongoose.model('User', modelsAndSchemas.schemas.user);
+modelsAndSchemas.models.PublicMessage = mongoose.model('PublicMessage', modelsAndSchemas.schemas.publicMessage);
+modelsAndSchemas.models.privateMessage = mongoose.model('PrivateMessage', modelsAndSchemas.schemas.privateMessage);
+
+module.exports = modelsAndSchemas;

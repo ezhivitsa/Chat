@@ -25,7 +25,12 @@
 			return str.replace(new RegExp("^" + strExp + "+|" + strExp + "+$", 'g'), '');
 		},
 		// set options in first oject that exist in array shema and in second object
-		setShemaData: function (schema, obj1, obj2) {
+		setShemaData: function (schema, obj1, obj2, defaults) {
+			for ( var opt in defaults ) {
+				if ( schema.indexOf(opt) + 1 ) {
+					obj1[opt] = defaults[opt];
+				}
+			}
 			for ( var opt in obj2 ) {
 				if ( schema.indexOf(opt) + 1 ) {
 					obj1[opt] = obj2[opt];

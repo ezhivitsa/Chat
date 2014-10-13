@@ -1,8 +1,10 @@
 'use strict';
 
 module.exports = {
-	ok: function (responce, message) {
-
+	created: function (responce, responseJSON) {
+		responseJSON = responseJSON || {};
+		response.writeHead(201, {'Content-Type': 'application/json'});
+		response.end(JSON.stringify(responseJSON));
 	},
 	badRequest: function (response, message) {
 		message = message || "This request doesn't processed by the server";		

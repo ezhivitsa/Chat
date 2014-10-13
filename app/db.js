@@ -29,8 +29,16 @@ Db.prototype.connect = function () {
 	mongoose.connect( connectString );
 }
 
-Db.prototype.disconnect = function () {
-	mongoose.disconnect();
+Db.prototype.reconnect = function () {
+	var self = this;
+
+	self.disconnet(function () {
+		self.connect();
+	});
+}
+
+Db.prototype.disconnect = function (callback) {
+	mongoose.disconnect(callback);
 }
 
 module.exports = Db;

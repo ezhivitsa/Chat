@@ -1,5 +1,7 @@
 (function () {
 	'use strict';
+
+	var responces = require('./responces');
 	
 	module.exports = {
 		// extend all options of the first object and unique options of the second object
@@ -36,6 +38,15 @@
 					obj1[opt] = obj2[opt];
 				}
 			}
+		},
+		handleDbErrors: function (err, db, responce) {
+			if ( err ) {
+				console.log(err);
+				responces.internalServerError(responce);
+				db.reconnect();
+				return false;
+			}
+			return true;
 		}
 	};
 

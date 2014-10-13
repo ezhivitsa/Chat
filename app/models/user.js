@@ -6,7 +6,19 @@ var helpers = require('../helpers'),
 	crypto = require('crypto'),
 	responces = require('../responces');
 
-function User (db, request, session, opts) {
+function countUsers () {
+	return mongoModels.models.User.count({}).exec();
+}
+
+function createToken (callback) {
+	crypto.randomBytes(48, function(ex, buf) {
+		var token = buf.toString('hex');
+
+		( callback ) && callback(token);
+	});
+}
+
+function User (db, request, responce, session, opts) {
 	this.schema = ['id', 'name'];
 
 	this.options = {
@@ -15,6 +27,7 @@ function User (db, request, session, opts) {
 
 	this.assets = {
 		db: db,
+		responce: responce,
 		request: request,
 		session: session
 	};
@@ -43,14 +56,31 @@ User.prototype.login = function (opts) {
 	}
 	else {
 		// creating user with name anonimous
-		promise = this.countUsers();
+		promise = countUsers();
 		promise.then(function (err, count) {
 			if ( err ) {
-				responces.internalServerError(self.request);
-				return;
+				return helpers.handleDbErrors(err, self.assets.db, self.assets.responce);
 			}
 
+			self.name = self.options.standardName + count;
 
+			createToken(function (token) {
+				self.token = token;
+				promise = self.createUser();
+
+				promise.then(function (err, user) {
+					if ( err ) {
+						return helpers.handleDbErrors(err, self.assets.db, self.assets.responce);
+					}
+
+					console.log(user);
+
+					responces.created({
+						id: user._id,
+						token: user.token
+					});
+				});
+			});
 		});
 
 		// // try to create user if now no exist active user with the same name
@@ -76,18 +106,15 @@ User.prototype.login = function (opts) {
 	}
 }
 
-User.prototype.countUsers = function () {
-	return mongoModels.models.User.count().exec();
-}
 
 User.prototype.createUser = function () {
+	var self = this;
 
-}
-
-User.prototype.createToken = function () {
-	crypto.randomBytes(48, function(ex, buf) {
-		var token = buf.toString('hex');
+	return mongoModels.models.User.create({
+		name: self.name,
+		token: self.token
 	});
 }
+
 
 module.exports = User;

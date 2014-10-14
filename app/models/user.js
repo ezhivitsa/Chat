@@ -4,18 +4,20 @@ var helpers = require('../helpers'),
 	mongoModels = require('./mongoModels'),
 	mongoose = require('mongoose'),
 	crypto = require('crypto'),
-	responses = require('../responses');
+	responses = require('../responses'),
+	promise = require("bluebird");
 
 function countUsers () {
 	return mongoModels.models.User.count().exec();
 }
 
 function createToken (callback) {
-	crypto.randomBytes(48, function(ex, buf) {
-		var token = buf.toString('hex');
+	return promise.promisify(require("crypto").randomBytes);
+	// crypto.randomBytes(48, function(ex, buf) {
+	// 	var token = buf.toString('hex');
 
-		( callback ) && callback(token);
-	});
+	// 	( callback ) && callback(token);
+	// });
 }
 
 function User (db, request, response, session, opts) {
@@ -114,5 +116,36 @@ User.prototype.createUser = function () {
 	});
 }
 
+User.prototype.updateUserInfo = function (opts, callback) {
+	var self = this,
+		id = self.assets.request.csession['id'];
+
+	if ( !id ) {
+		return;
+	}
+
+	var objectId = mongoose.Types.ObjectId(id);
+	createToken(48)
+		.then(function (token) {
+			var updates = helpers.extend({ token: token, lastActivity: Date.now() }, opts);
+			mongoModels.models.User.findOneAndUpdate( { _id: id }, updates, function (err, user) {
+				if ( err ) {
+					return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
+				}
+
+				self.assets.request.csession['id'] = id;
+				self.assets.request.csession['token'] = token;
+				self.assets.session.csset(self.assets.request, self.assets.response);
+
+				( callback ) && callback();
+			});
+		});
+}
+
+User.prototype.updateName = function () {
+	this.updateUserInfo({ name: this.name }, function () {
+		// 200 ok updated
+	});
+}
 
 module.exports = User;

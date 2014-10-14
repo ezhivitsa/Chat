@@ -4,6 +4,7 @@
 	"devDependencies": {
 		"mongoose": "latest",
 		"cluster": "latest",
-		"client-session": "latest"
+		"client-session": "latest",
+		"bluebird": "latest"
 	}
 }

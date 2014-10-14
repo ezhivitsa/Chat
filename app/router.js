@@ -1,6 +1,6 @@
 'use strict';
 
-var responces = require('./responces'),
+var responses = require('./responses'),
 	helpers = require('./helpers'),
 	fs = require('fs');
 
@@ -47,17 +47,17 @@ exports.route = function (request, response, session, pathname, method, handlers
 					readStream.pipe(response);
 				}
 				else {
-					responces.badRequest(response);
+					responses.badRequest(response);
 				}
 			});
 		}
 		else {
-			responces.badRequest(response);
+			responses.badRequest(response);
 		}
 	}
 	else {
 		// method that not processed by the server
 		// send 400 status code
-		responces.badRequest(response);
+		responses.badRequest(response);
 	}
 };

@@ -7,7 +7,7 @@ var HttpServer = require('./httpServer'),
 	User = require('./models/user');
 
 server.post('login', function (request, response, data, session) {
-	var user = new User(db, request, session, data);
+	var user = new User(db, request, response, session, data);
 	user.login();
 });
 

@@ -4,10 +4,10 @@ var helpers = require('../helpers'),
 	mongoModels = require('./mongoModels'),
 	mongoose = require('mongoose'),
 	crypto = require('crypto'),
-	responces = require('../responces');
+	responses = require('../responses');
 
 function countUsers () {
-	return mongoModels.models.User.count({}).exec();
+	return mongoModels.models.User.count().exec();
 }
 
 function createToken (callback) {
@@ -18,7 +18,7 @@ function createToken (callback) {
 	});
 }
 
-function User (db, request, responce, session, opts) {
+function User (db, request, response, session, opts) {
 	this.schema = ['id', 'name'];
 
 	this.options = {
@@ -27,7 +27,7 @@ function User (db, request, responce, session, opts) {
 
 	this.assets = {
 		db: db,
-		responce: responce,
+		response: response,
 		request: request,
 		session: session
 	};
@@ -57,25 +57,23 @@ User.prototype.login = function (opts) {
 	else {
 		// creating user with name anonimous
 		promise = countUsers();
-		promise.then(function (err, count) {
-			if ( err ) {
-				return helpers.handleDbErrors(err, self.assets.db, self.assets.responce);
+		promise.then(function (count, onReject) {
+			if ( onReject ) {
+				return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
 			}
 
 			self.name = self.options.standardName + count;
 
 			createToken(function (token) {
 				self.token = token;
-				promise = self.createUser();
+				var createPromise = self.createUser();
 
-				promise.then(function (err, user) {
-					if ( err ) {
-						return helpers.handleDbErrors(err, self.assets.db, self.assets.responce);
+				createPromise.then(function (user, onReject) {
+					if ( onReject ) {
+						return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
 					}
 
-					console.log(user);
-
-					responces.created({
+					responses.created(self.assets.response, {
 						id: user._id,
 						token: user.token
 					});

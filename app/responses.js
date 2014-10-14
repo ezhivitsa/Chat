@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-	created: function (responce, responseJSON) {
+	created: function (response, responseJSON) {
 		responseJSON = responseJSON || {};
 		response.writeHead(201, {'Content-Type': 'application/json'});
 		response.end(JSON.stringify(responseJSON));

@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	var responces = require('./responces');
+	var responses = require('./responses');
 	
 	module.exports = {
 		// extend all options of the first object and unique options of the second object
@@ -39,10 +39,10 @@
 				}
 			}
 		},
-		handleDbErrors: function (err, db, responce) {
+		handleDbErrors: function (err, db, response) {
 			if ( err ) {
-				console.log(err);
-				responces.internalServerError(responce);
+				console.log('error: ', err);
+				responses.internalServerError(response);
 				db.reconnect();
 				return false;
 			}

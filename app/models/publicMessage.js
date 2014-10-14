@@ -3,7 +3,7 @@
 var helpers = require('../helpers'),
 	mongoModels = require('./mongoModels'),
 	mongoose = require('mongoose'),
-	responces = require('../responces');
+	responses = require('../responses');
 
 function PublicMessage(db, response, opts) {
 	this.schema = ['author', 'message', 'limit', 'page'];
@@ -35,7 +35,7 @@ PublicMessage.prototype = {
 		if (typeof self.message === "string" && self.message.length != 0) {
 			var message = new mongoModels.models.PublicMessage({ author: self.author, message: self.message });
 		} else {
-			responces.badRequest(self.assets.response,"Bad or empty message");
+			responses.badRequest(self.assets.response,"Bad or empty message");
 		}
 	}
 }

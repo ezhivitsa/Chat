@@ -3,7 +3,9 @@
 var http = require('http'),
 	cluster = require('cluster'),
 	cs = require('client-session'),
-    clientSession = cs('mysecretkey'),
+    clientSession = cs('mysecretkey', {
+    	maxAge: 86400000 // 1 day
+    }),
 	os = require('os'),
 	helpers = require('./helpers'),
 	processRequest = require('./processRequest');

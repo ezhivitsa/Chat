@@ -7,6 +7,8 @@ var helpers = require('../helpers'),
 	responses = require('../responses'),
 	promise = require("bluebird");
 
+var ONE_HOUR = 3600000;
+
 function countUsers () {
 	return mongoModels.models.User.count().exec();
 }
@@ -52,8 +54,16 @@ User.prototype.login = function (opts) {
 		var objectId = mongoose.Types.ObjectId(id);
 		
 		promise = mongoModels.models.User.findById(objectId).exec();
-		promise.then(function (err, user) {
+		promise.then(function (user, onReject) {
+			if ( onReject ) {
+				return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
+			}
 
+			if ( !user || user.token != token ) {
+				// user was not found or some anouther user already use this account
+				self.setIdAndToken(null, null);
+				self.login();
+			}
 		});
 	}
 	else {
@@ -74,6 +84,9 @@ User.prototype.login = function (opts) {
 					if ( onReject ) {
 						return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
 					}
+
+					// adding id and token to the user sessiom cookie
+					self.setIdAndToken(user._id, user.token);
 
 					responses.created(self.assets.response, {
 						id: user._id,
@@ -133,19 +146,44 @@ User.prototype.updateUserInfo = function (opts, callback) {
 					return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
 				}
 
-				self.assets.request.csession['id'] = id;
-				self.assets.request.csession['token'] = token;
-				self.assets.session.csset(self.assets.request, self.assets.response);
-
+				self.setIdAndToken(id, token);
 				( callback ) && callback();
 			});
 		});
 }
 
 User.prototype.updateName = function () {
+	var self = this;
+
+	mongoModels.models.User.findOne({ name: self.name }, function (err, user) {
+		if ( err ) {
+			return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
+		}
+
+		if ( !user ) {
+			// name available to use
+		}
+		else {
+			// account with such name already created
+			if ( user.lastActivity + ONE_HOUR > new Date() ) {
+				// not possible to use this name
+				responses.forbidden(self.assets.response, "This name is already in use");
+			}
+			else {
+				self.assets.request.csession['id'] = user._id;
+				self.updateUserInfo();
+			}
+		}
+	});
 	this.updateUserInfo({ name: this.name }, function () {
 		// 200 ok updated
 	});
+}
+
+User.prototype.setIdAndToken = function (id, token) {
+	this.assets.request.csession['id'] = id;
+	this.assets.request.csession['token'] = token;
+	this.assets.session.csset(this.assets.request, this.assets.response);
 }
 
 module.exports = User;

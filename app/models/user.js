@@ -5,7 +5,7 @@ var helpers = require('../helpers'),
 	mongoose = require('mongoose'),
 	crypto = require('crypto'),
 	responses = require('../responses'),
-	promise = require("bluebird");
+	Promise = require("bluebird");
 
 var ONE_HOUR = 3600000;
 
@@ -14,7 +14,7 @@ function countUsers() {
 }
 
 function createToken(callback) {
-	return promise.promisify(require("crypto").randomBytes);
+	return Promise.promisify(crypto.randomBytes);
 	// crypto.randomBytes(48, function(ex, buf) {
 	// 	var token = buf.toString('hex');
 
@@ -44,7 +44,8 @@ User.prototype.init = function(opts) {
 };
 
 User.prototype.login = function(opts) {
-	var self = this;
+	var self = this,
+		resolver = Promise.defer();
 
 	// if in cookie exist id and token than try fo find this user in database
 	var promise = null,
@@ -58,61 +59,54 @@ User.prototype.login = function(opts) {
 			if (!user || user.token != token) {
 				// user was not found or some anouther user already use this account
 				self.setIdAndToken(null, null);
-				self.login();
+				self.registerNew(resolver);
 			}
 		}, function(err) {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		});
 	} else {
 		// creating user with name anonimous
-		promise = countUsers();
-		promise.then(function(count) {
+		self.registerNew(resolver);
+	}
 
-			self.name = self.options.standardName + count;
+	return resolver.promise;
+}
 
-			createToken(function(token) {
+User.prototype.registerNew = function (resolver) {
+	var self = this;
+
+	var promise = countUsers();
+	promise.then(function (count) {
+
+		self.name = self.options.standardName + count;
+		// self.updateUserInfo(function (user) {
+		// 	resolver.resolve(user);
+		// });
+
+		createToken(48)
+			.then(function (token) {
 				self.token = token;
 				var createPromise = self.createUser();
+
+				console.log(token)
 
 				createPromise.then(function(user) {
 					// adding id and token to the user sessiom cookie
 					self.setIdAndToken(user._id, user.token);
+					resolver.resolve(user);
 
-					responses.created(self.assets.response, {
-						id: user._id,
-						token: user.token
-					});
+					// responses.created(self.assets.response, {
+					// 	id: user._id,
+					// 	token: user.token
+					// });
 				});
-			}, function(err) {
+			}, function (err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			});
-		}, function(err) {
-			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-		});
-
-		// // try to create user if now no exist active user with the same name
-		// promise = mongoModels.models.User.findOne({ name: self.this }).exec();
-		// promise.then(function (err, user) {
-		// 	if ( user == null ) {
-		// 		// user with this  name doesn't exist
-		// 		// create token
-		// 		crypto.randomBytes(48, function(ex, buf) {
-		// 			token = buf.toString('hex');
-
-		// 			mongoModels.models.User.create({
-		// 				name: self.name,
-		// 				token: token
-		// 			});
-		// 		});
-		// 	}
-		// 	else {
-		// 		// this user already exist
-		// 		//if ( usel.lastActivity )
-		// 	}
-		// });
-	}
+	}, function (err) {
+		return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+	});
 }
-
 
 User.prototype.createUser = function() {
 	var self = this;
@@ -138,15 +132,18 @@ User.prototype.updateUserInfo = function(opts, callback) {
 				token: token,
 				lastActivity: Date.now()
 			}, opts);
+
+
 			mongoModels.models.User.findOneAndUpdate({
-				_id: id
+				_id: objectId
 			}, updates, function(err, user) {
 				if (err) {
-					return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
+					return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 				}
 
 				self.setIdAndToken(id, token);
-				(callback) && callback();
+				console.log('updated');
+				(callback) && callback(user);
 			});
 		});
 }

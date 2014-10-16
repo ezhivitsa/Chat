@@ -8,7 +8,10 @@ var HttpServer = require('./httpServer'),
 
 server.post('login', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
-	user.login();
+	user.login()
+		.then(function(user) {
+			console.log(user);
+		});
 });
 
 server.get('user/id/{userId}', function (request, response, data, session) {

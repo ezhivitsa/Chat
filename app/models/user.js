@@ -184,8 +184,17 @@ User.prototype.sendName = function () {
 	responses.ok(self.assets.response, { name: self.name });
 }
 
-User.prototype.getUserByName = function () {
-	var resolver = Promise.defer();
+User.prototype.getUserByName = function (name) {
+	var resolver = Promise.defer(),
+		name = name || self.name;
+
+	mongoModels.models.User.findOne({ name: name }, function (err, user) {
+		if ( err ) {
+			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+		}
+
+		resolver.resolve(user);
+	});
 
 	return resolver.promise;
 }

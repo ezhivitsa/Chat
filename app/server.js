@@ -2,24 +2,35 @@
 
 var HttpServer = require('./httpServer'),
 	Db = require('./db'),
-	server = new HttpServer(),
-	db = new Db(),
-	User = require('./models/user');
+	User = require('./models/user'),
+	PublicMessages = require('./models/publicMessages');
 
-server.post('login', function (request, response, data, session) {
+var server = new HttpServer(),
+	db = new Db(),
+	publicMessages = new PublicMessages(db);
+
+server.get('user', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
-	user.login()
-		.then(function(user) {
-			console.log(user);
+	user.authorization()
+		.then(function(currentUser) {
+			user.sendName();
 		});
 });
 
-server.get('user/id/{userId}', function (request, response, data, session) {
-	console.log('get', data)
+server.get('publicMessages', function (request, response, data, session) {
+	publicMessages.get(response, data);
 });
 
-server.post('user/id/{userId}', function (request, response, data, session) {
-	console.log('post', data)
+server.post('publicMessage', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.authorization()
+		.then(function(currentUser) {
+			publicMessages.publish(response, data, currentUser);
+		});
+});
+
+server.get('publicMessages/last/{time}', function (request, response, data, session) {
+	publicMessages.getLast(response, data);
 });
 
 server.start();

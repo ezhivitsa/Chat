@@ -24,7 +24,7 @@
 		},
 		trimStr: function (str, strExp) {
 			str = str || "";
-			return str.replace(new RegExp("^" + strExp + "+|" + strExp + "+$", 'g'), '');
+			return str.replace(new RegExp("^" + strExp + "+|" + strExp + "+$", 'g'), '').toLowerCase();
 		},
 		// set options in first oject that exist in array shema and in second object
 		setShemaData: function (schema, obj1, obj2, defaults) {

@@ -33,7 +33,7 @@ var modelsAndSchemas = {
 			},
 			message: String,
 			time: { type: Date, default: Date.now },
-			isRead: Boolean
+			isRead: { type: Boolean, default: false }
 		}, {
 			collection: 'privateMessages'
 		}),

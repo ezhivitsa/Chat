@@ -13,13 +13,8 @@ function countUsers() {
 	return mongoModels.models.User.count().exec();
 }
 
-function createToken(callback) {
+function createToken() {
 	return Promise.promisify(crypto.randomBytes);
-	// crypto.randomBytes(48, function(ex, buf) {
-	// 	var token = buf.toString('hex');
-
-	// 	( callback ) && callback(token);
-	// });
 }
 
 function User(db, request, response, session, opts) {
@@ -43,7 +38,7 @@ User.prototype.init = function(opts) {
 	helpers.setShemaData(this.schema, this, opts);
 };
 
-User.prototype.login = function(opts) {
+User.prototype.authorization = function(opts) {
 	var self = this,
 		resolver = Promise.defer();
 
@@ -79,16 +74,12 @@ User.prototype.registerNew = function (resolver) {
 	promise.then(function (count) {
 
 		self.name = self.options.standardName + count;
-		// self.updateUserInfo(function (user) {
-		// 	resolver.resolve(user);
-		// });
 
-		createToken(48)
-			.then(function (token) {
+		createToken()(48)
+			.then(function (buf) {
+				var token = buf.toString('hex');
 				self.token = token;
 				var createPromise = self.createUser();
-
-				console.log(token)
 
 				createPromise.then(function(user) {
 					// adding id and token to the user sessiom cookie
@@ -142,20 +133,21 @@ User.prototype.updateUserInfo = function(opts, callback) {
 				}
 
 				self.setIdAndToken(id, token);
-				console.log('updated');
 				(callback) && callback(user);
 			});
 		});
 }
 
-User.prototype.updateName = function() {
+User.prototype.updateName = function(name) {
 	var self = this;
+
+	self.name = name || self.name;
 
 	mongoModels.models.User.findOne({
 		name: self.name
 	}, function(err, user) {
 		if (err) {
-			return helpers.handleDbErrors(onReject, self.assets.db, self.assets.response);
+			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		}
 
 		if (!user) {
@@ -167,6 +159,7 @@ User.prototype.updateName = function() {
 				responses.forbidden(self.assets.response, "This name is already in use");
 			} else {
 				self.assets.request.csession['id'] = user._id;
+				self.id = user._id;
 				self.updateUserInfo();
 			}
 		}
@@ -179,9 +172,22 @@ User.prototype.updateName = function() {
 }
 
 User.prototype.setIdAndToken = function(id, token) {
+	this.id = id;
+	this.token = token;
 	this.assets.request.csession['id'] = id;
 	this.assets.request.csession['token'] = token;
 	this.assets.session.csset(this.assets.request, this.assets.response);
+}
+
+User.prototype.sendName = function () {
+	var self = this;
+	responses.ok(self.assets.response, { name: self.name });
+}
+
+User.prototype.getUserByName = function () {
+	var resolver = Promise.defer();
+
+	return resolver.promise;
 }
 
 module.exports = User;

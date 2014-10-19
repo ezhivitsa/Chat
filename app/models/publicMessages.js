@@ -18,7 +18,7 @@ function PublicMessages(db) {
 
 PublicMessages.prototype = {
 
-	constructor: PublicMessage,
+	constructor: PublicMessages,
 
 	publish: function (response, data, author) {
 		var self = this;
@@ -74,7 +74,7 @@ PublicMessages.prototype = {
 		}
 
 		mongoModels.models.PublicMessage.find({ time: { $gt: new Date(time) } }, function (err, messages) {
-			function(err) {
+			if (err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			}
 
@@ -83,4 +83,4 @@ PublicMessages.prototype = {
 	}
 }
 
-module.exports = PublicMessage;
+module.exports = PublicMessages;

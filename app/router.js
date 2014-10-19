@@ -5,7 +5,7 @@ var responses = require('./responses'),
 	fs = require('fs');
 
 var paramRefExp = /{(\w+)}/g,
-	fileRegExp = /(.*)(\w+\.\w+)$/;
+	fileRegExp = /.*(\w+\.(\w+))$/;
 
 exports.route = function (request, response, session, pathname, method, handlers, publicFolder, defaultFile, data) {
 	if ( handlers[method] ) {
@@ -42,8 +42,24 @@ exports.route = function (request, response, session, pathname, method, handlers
 			fs.exists(publicFolder + '/' + pathname, function (exists) {
 				if (exists) {
 					// if file exist open and send it
-					var readStream = fs.createReadStream(publicFolder + '/' + pathname);
-					response.writeHead(200);
+					var readStream = fs.createReadStream(publicFolder + '/' + pathname),
+						extention = pathname.match(fileRegExp)[2];
+
+					switch (extention) {
+						case 'html':
+							response.writeHead(200, {'Content-Type': 'text/html'});
+							break;
+						case 'css':
+							response.writeHead(200, {'Content-Type': 'text/css'});
+							break;
+						case 'js':
+							response.writeHead(200, {'Content-Type': 'text/javascript'});
+							break;
+						default:
+							response.writeHead(200);
+							break;						
+					}
+
 					readStream.pipe(response);
 				}
 				else {

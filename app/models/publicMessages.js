@@ -20,7 +20,7 @@ PublicMessages.prototype = {
 
 	constructor: PublicMessages,
 
-	publish: function (response, data, author) {
+	publish: function(response, data, author) {
 		var self = this;
 
 		// check content of message field
@@ -29,57 +29,45 @@ PublicMessages.prototype = {
 			var promise = mongoModels.models.PublicMessage.create({
 				author: author,
 				message: data.message
-			});
+			}).exec();
 			promise.then(function(message) {
 				responses.created(response, {
 					id: message.id
 				})
 			}, function(err) {
-				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+				return helpers.handleDbErrors(err, self.assets.db, response);
 			});
 		} else {
 			// reject bad request error
-			responses.badRequest(self.assets.response, "Bad or empty message");
+			responses.badRequest(response, "Bad or empty message");
 			return;
 		}
 	},
 
-	get: function (response, data) {
+	get: function(response, data) {
 		var self = this,
-			limit = data.limit || self.limit,
-			skip = data.skip || 0;
+			limit = Math.abs(data.limit) || self.limit,
+			criteria = {};
+		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
 
 		// get limited num of messages from page * limit position
-		var promise = mongoModels.models.PublicMessage.sort({ time: -1 }).skip(skip).limit(limit + 1).exec();
+		var promise = mongoModels.models.PublicMessage.find({
+				time: criteria
+			})
+			.sort({
+				time: -1
+			}).limit(limit + 1).exec();
 
 		promise.then(function(messages) {
-			var end = messages.length <= self.limit;
+			var end = messages.length <= limit;
 			!end && messages.pop();
-			responses.ok(self.assets.responses, {
+			responses.ok(response, {
 				messages: messages,
 				end: end
 			});
 		}, function(err) {
-			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+			return helpers.handleDbErrors(err, self.assets.db, response);
 		})
-	},
-
-	getLast: function (response, data) {
-		var self = this,
-			time = parseInt(data.time);
-
-		if (time != time) {
-			responses.badRequest(self.assets.responses, { messages: messages });
-			return;
-		}
-
-		mongoModels.models.PublicMessage.find({ time: { $gt: new Date(time) } }, function (err, messages) {
-			if (err) {
-				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-			}
-
-			responses.ok(self.assets.responses, { messages: messages });
-		});
 	}
 }
 

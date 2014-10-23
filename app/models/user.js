@@ -56,6 +56,12 @@ User.prototype.authorization = function(opts) {
 				self.setIdAndToken(null, null);
 				self.registerNew(resolver);
 			}
+			else {
+				// user identified
+				self.setIdAndToken(user._id, user.token);
+				self.name = user.name;
+				resolver.resolve(user);
+			}
 		}, function(err) {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		});

@@ -1,6 +1,6 @@
-define(['../elements/header'], 
-	function () {
-		function MainPage(header) {
+define(['elements/header'], 
+	function (Header) {
+		function MainPage() {
 			var header = new Header();
 		}
 

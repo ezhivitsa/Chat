@@ -46,7 +46,7 @@ PublicMessages.prototype = {
 
 	get: function(response, data) {
 		var self = this,
-			limit = Math.abs(data.limit) || self.limit,
+			limit = Math.abs(data.limit) || self.options.limit,
 			criteria = {};
 		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
 

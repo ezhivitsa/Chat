@@ -6,14 +6,15 @@ var helpers = require('../helpers'),
 	responses = require('../responses');
 
 function PrivateMessages(db, response, opts) {
-	// this.schema = ['author', 'message', 'recipient', 'limit', 'page'];
+	this.schema = ['author', 'message', 'recipient', 'limit'];
 
 	this.options = {
 		limit: 10
 	}
 
 	this.assets = {
-		db: db
+		db: db,
+		response: response
 	};
 
 	this.init(opts);
@@ -23,28 +24,32 @@ PrivateMessages.prototype = {
 
 	constructor: PublicMessage,
 
-	publish: function(response, data, author) {
+	init: function(opts) {
+		helpers.setShemaData(this.schema, this, opts);
+	},
+
+	publish: function() {
 		var self = this;
 
 		if (typeof self.recipient !== "string" || self.recipient.length == 0) {
-			responses.badRequest(response, "Bad or empty recipient");
+			responses.badRequest(self.assets.response, "Bad or empty recipient");
 			return;
 		}
 
 		// check recipient in chat
 		mongoModels.models.User.findOne({
-			name: recipient
+			name: self.recipient
 		}, function(err, user) {
 			if (err) {
 				helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			}
 			if (!user) {
-				responses.badRequest(response, "Recipient unavailable");
+				responses.badRequest(self.assets.response, "Recipient unavailable");
 			}
 			// check content of message field
 			if (typeof self.message !== "string" || self.message.length == 0) {
 				// reject bad request error
-				responses.badRequest(response, "Bad or empty message");
+				responses.badRequest(self.assets.response, "Bad or empty message");
 				return;
 			}
 			// save message
@@ -55,30 +60,56 @@ PrivateMessages.prototype = {
 			}).exec();
 
 			promise.then(function(message) {
-				responses.created(response, {
+				responses.created(self.assets.response, {
 					id: message.id
 				})
 			}, function(err) {
-				return helpers.handleDbErrors(err, self.assets.db, response);
+				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			});
 		});
 	},
 
-	count: function(response, user) {
+	count: function() {
 		var self = this;
 
 		var promise = mongoModels.models.PublicMessage.count({
-			author: user,
+			author: author,
 			isRead: false
 		}).exec();
 
 		promise.then(function(count) {
-			responses.ok(response, {
+			responses.ok(self.assets.response, {
 				count: count
 			});
 		}, function(err) {
-			return helpers.handleDbErrors(err, self.assets.db, response);
+			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		});
+	},
+
+	get: function() {
+		var self = this,
+			limit = Math.abs(self.limit) || self.options.limit,
+			criteria = {};
+		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
+
+		// get limited num of messages from page * limit position
+		var promise = mongoModels.models.PublicMessage.find({
+				time: criteria
+			})
+			.sort({
+				time: -1
+			}).limit(limit + 1).exec();
+
+		promise.then(function(messages) {
+			var end = messages.length <= limit;
+			!end && messages.pop();
+			responses.ok(response, {
+				messages: messages,
+				end: end
+			});
+		}, function(err) {
+			return helpers.handleDbErrors(err, self.assets.db, response);
+		})
 	}
 }
 

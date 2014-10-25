@@ -3,11 +3,13 @@
 var HttpServer = require('./httpServer'),
 	Db = require('./db'),
 	User = require('./models/user'),
-	PublicMessages = require('./models/publicMessages');
+	PublicMessages = require('./models/publicMessages'),
+	events = require('events');
 
 var server = new HttpServer(),
+	eventEmitter = events.EventEmitter,
 	db = new Db(),
-	publicMessages = new PublicMessages(db);
+	publicMessages = new PublicMessages(db, eventEmitter);
 
 server.get('user', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);

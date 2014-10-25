@@ -31,9 +31,5 @@ server.post('publicMessage', function (request, response, data, session) {
 		});
 });
 
-server.get('publicMessages/last/{time}', function (request, response, data, session) {
-	publicMessages.getLast(response, data);
-});
-
 server.start();
 db.connect();

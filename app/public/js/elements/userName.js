@@ -19,8 +19,10 @@ define(['dataSource', 'helpers'],
 		UserName.prototype.appendName = function () {
 			var self = this;
 
-			DataSource.getUserName(function (response) {
-				self.opts.element.innerHTML = response.name;
+			DataSource.getUserName(function (response, status) {
+				if ( status == 200 ) {
+					self.opts.element.innerHTML = response.name;
+				}
 			});
 		}
 

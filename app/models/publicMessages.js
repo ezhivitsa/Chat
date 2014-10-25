@@ -12,7 +12,7 @@ function PublicMessages(db, eventEmitter) {
 	}
 
 	this.assets = {
-		db: db
+		db: db,
 		eventEmitter: eventEmitter
 	};
 
@@ -31,13 +31,13 @@ PublicMessages.prototype = {
 				responses.ok(response, { messages: message });
 			});
 		});		
-	}
+	},
 
 	publish: function(response, data, author) {
 		var self = this;
 
 		// check content of message field
-		if (typeof data.message === "string" && self.message.length != 0) {
+		if (typeof data.message === "string" && data.message.length != 0) {
 			var messageObj = {
 				author: author,
 				message: data.message
@@ -52,7 +52,7 @@ PublicMessages.prototype = {
 			
 			promise.then(function(message) {
 				responses.created(response, {
-					id: message.id
+					message: message
 				})
 			}, function(err) {
 				return helpers.handleDbErrors(err, self.assets.db, response);

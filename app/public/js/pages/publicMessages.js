@@ -1,9 +1,9 @@
 define([],
 	function () {
-		function PublicMessages () {
+		function PublicMessagesPage () {
 
 		}
 
-		return PublicMessages;
+		return PublicMessagesPage;
 	}
 );

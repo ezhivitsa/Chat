@@ -6,7 +6,7 @@ var helpers = require('../helpers'),
 	responses = require('../responses');
 
 function PrivateMessages(db, response, opts) {
-	this.schema = ['author', 'message', 'recipient', 'limit'];
+	this.schema = ['author', 'message', 'recipient', 'limit', 'start'];
 
 	this.options = {
 		limit: 10
@@ -22,7 +22,7 @@ function PrivateMessages(db, response, opts) {
 
 PrivateMessages.prototype = {
 
-	constructor: PublicMessage,
+	constructor: privateMessage,
 
 	init: function(opts) {
 		helpers.setShemaData(this.schema, this, opts);
@@ -53,7 +53,7 @@ PrivateMessages.prototype = {
 				return;
 			}
 			// save message
-			var promise = mongoModels.models.PublicMessage.create({
+			var promise = mongoModels.models.privateMessage.create({
 				author: self.author,
 				message: self.message,
 				recipient: user
@@ -72,8 +72,8 @@ PrivateMessages.prototype = {
 	count: function() {
 		var self = this;
 
-		var promise = mongoModels.models.PublicMessage.count({
-			author: author,
+		var promise = mongoModels.models.privateMessage.count({
+			author: self.author,
 			isRead: false
 		}).exec();
 
@@ -90,27 +90,49 @@ PrivateMessages.prototype = {
 		var self = this,
 			limit = Math.abs(self.limit) || self.options.limit,
 			criteria = {};
-		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
-
-		// get limited num of messages from page * limit position
-		var promise = mongoModels.models.PublicMessage.find({
-				time: criteria
+		if (self.start) {
+			// get limited num of unreaded private messages 
+			var promise = mongoModels.models.privateMessage.find({
+					author: self.author,
+					isRead: false
+				})
+				.sort({
+					time: -1
+				}).limit(limit + 1).exec();
+			promise.then(function(messages) {
+				var end = messages.length <= limit;
+				!end && messages.pop();
+				responses.ok(response, {
+					messages: messages,
+					end: end
+				});
+			}, function(err) {
+				return helpers.handleDbErrors(err, self.assets.db, response);
 			})
-			.sort({
-				time: -1
-			}).limit(limit + 1).exec();
+		} else {
+			criteria[self.limit > 0 ? '$gt' : '$lt'] = self.time ? new Date(self.time) : new Date();
 
-		promise.then(function(messages) {
-			var end = messages.length <= limit;
-			!end && messages.pop();
-			responses.ok(response, {
-				messages: messages,
-				end: end
-			});
-		}, function(err) {
-			return helpers.handleDbErrors(err, self.assets.db, response);
-		})
+			// get limited num of all private messages
+			var promise = mongoModels.models.privateMessage.find({
+					time: criteria,
+					author: self.author
+				})
+				.sort({
+					time: -1
+				}).limit(limit + 1).exec();
+
+			promise.then(function(messages) {
+				var end = messages.length <= limit;
+				!end && messages.pop();
+				responses.ok(response, {
+					messages: messages,
+					end: end
+				});
+			}, function(err) {
+				return helpers.handleDbErrors(err, self.assets.db, response);
+			})
+		}
 	}
 }
 
-module.exports = PublicMessage;
+module.exports = privateMessage;

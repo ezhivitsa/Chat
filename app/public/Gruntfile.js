@@ -3,10 +3,12 @@ module.exports = function (grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 
-		sass: {
+		compass: {
 			dist: {
-				files: {
-					'css/main.css': ['sass/style.scss']
+				options: {
+					sassDir: 'sass',
+					cssDir: 'css',
+					environment: 'production'
 				}
 			}
 		},
@@ -30,16 +32,16 @@ module.exports = function (grunt) {
 			},
 			css: {
 				files: ['sass/**/*.scss'],
-				tasks: ['sass']
+				tasks: ['compass']
 			}
 		}
 
 	});
 
 	grunt.loadNpmTasks('grunt-contrib-requirejs');
-	grunt.loadNpmTasks('grunt-contrib-sass');
+	grunt.loadNpmTasks('grunt-contrib-compass');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
-	grunt.registerTask('build', ['requirejs', 'sass'])
+	grunt.registerTask('build', ['requirejs', 'compass'])
 	grunt.registerTask('w', ['build', 'watch'])
 }

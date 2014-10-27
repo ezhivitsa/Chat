@@ -22,6 +22,6 @@ define(['dataSource', 'helpers'],
 			});
 		}
 
-		return PrivateMessage;
+		return PrivateMessages;
 	}
 );

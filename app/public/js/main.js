@@ -1,7 +1,8 @@
-define(['pages/main'], 
-	function (MainPage) {
+define(['pages/main', 'pages/privateMessages'], 
+	function (MainPage, PrivateMessagesPage) {
 		var pages = {
-			main: MainPage
+			'main': MainPage,
+			'private-messages': PrivateMessagesPage
 		};
 
 		var body = document.querySelector('body'),

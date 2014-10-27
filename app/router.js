@@ -15,10 +15,12 @@ exports.route = function (request, response, session, pathname, method, handlers
 				match = null,
 				pathRegString = path.replace(paramRefExp, "(\\w+)"),
 				pathReg = new RegExp(pathRegString);
+
 				
-			if ( pathReg.test(pathname) ) {
+			if ( pathReg.exec(pathname) == pathname ) {
 				// url is the same as the pattern
 				// finding path params
+
 				var matchParamRes = pathReg.exec(pathname),
 					i = 1;
 				while ( (match = paramRefExp.exec(path)) != null && i < matchParamRes.length ) {

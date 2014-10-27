@@ -6,7 +6,7 @@ var url = require('url'),
 	router = require('./router');
 
 module.exports = function (request, response, session, handlers, publicFolder, defaultFile) {
-	var pathname = url.parse(request.url).pathname,
+	var pathname = url.parse(request.url).pathname.toLowerCase(),
 		method = request.method.toLowerCase();
 
 	pathname = helpers.trimStr(pathname, "\/");
@@ -25,7 +25,7 @@ module.exports = function (request, response, session, handlers, publicFolder, d
 		});
 
 		request.on("end", function() {
-			router.route(request, response, session, pathname, method, handlers, publicFolder, defaultFile, querystring.parse(postData));
+			router.route(request, response, session, pathname, method, handlers, publicFolder, defaultFile, JSON.parse(postData));
 		});
 	}
 };

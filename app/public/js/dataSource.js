@@ -4,7 +4,9 @@ define([],
 			urlPatterns = {
 				user: domain + 'user',
 				countNewPrivateMessages: domain + 'privateMessages/count',
-				publicMessages: domain + 'publicMessages'
+				publicMessages: domain + 'publicMessages',
+				message: domain + 'publicMessages/message',
+				userUpdate: domain + 'user/update'
 			};
 
 		function createHttpGet (url, callback) {
@@ -20,42 +22,44 @@ define([],
 		}
 
 		function createHttpPost (data, url, callback) {
-			var http = new XMLHttpRequest();
+			var xhr = new XMLHttpRequest();
 			var params = JSON.stringify(data);
-			http.open("POST", url, true);
+			xhr.open("POST", url, true);
 
 			//Send the proper header information along with the request
-			http.setRequestHeader("Content-type", "application/json");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
+			xhr.setRequestHeader("Content-type", "application/json");
 
-			http.onreadystatechange = function() {
+			xhr.onreadystatechange = function() {
 				//Call a function when the state changes.
 			    if (xhr.readyState == 4) {
+			    	console.log(xhr.responseText)
 					var resp = JSON.parse(xhr.responseText);
 					( callback ) && callback(resp, xhr.status);
 				}
 			}
-			http.send(params);
+			xhr.send(params);
 		}
 
 		return {
 			getUserName: function (callback) {
-				createHttpRequest('get', urlPatterns.user, callback);
+				createHttpGet(urlPatterns.user, callback);
 			},
 			countNewPrivateMessages: function (callback) {
 				createHttpRequest('get', urlPatterns.countNewPrivateMessages, callback);
 				createHttpGet(urlPatterns.user, callback);
 			},
 			getMessages: function (time, limit, callback) {
-				var url = urlPatterns.user + '?';
+				var url = urlPatterns.publicMessages + '?';
 				( time ) && ( url += 'time=' + time + '&' );
 				( limit ) && ( url += 'limit=' + limit );
 
 				createHttpGet(url, callback);
 			},
 			publishPublicMessage: function (message, callback) {
-				createHttpPost({ message: message });
+				createHttpPost({ message: message }, urlPatterns.message, callback);
+			},
+			updateName: function (name, callback) {
+				createHttpPost({ name: name }, urlPatterns.userUpdate, callback);
 			}
 		};
 	}

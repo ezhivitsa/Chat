@@ -5,17 +5,19 @@
 	<meta name=viewport content="width=device-width, initial-scale=1">
 	<title>Chat</title>
 </head>
-<body class="main">
+<body class="user">
 	<header>
+		<a href="/" class="back">Back</a>
 		<div class="name"><a href="/user.html"></a></div>
 		<div class="private-messages"><a href="/private-messages.html"></a></div>
 	</header>
-	<section class="messages">
-		<ul></ul>
+	<section>
+		<span>New user name</span>
+		<input type="text" id="name" />
+		<span class="error"></span>
+		<button class="change">Change name</button>
 	</section>
 	<footer>
-		<textarea id="message"></textarea>
-		<button>Send message</button>
 	</footer>
 	<script data-main="scripts/main.min.js" src="bower_components/requirejs/require.js"></script>
 </body>

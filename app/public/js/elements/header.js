@@ -1,8 +1,7 @@
-define(['elements/userName', 'elements/privateMessages', 'elements/privateMessages'],
-	function (UserName, PublicMessages, PrivateMessages) {
+define(['elements/userName', 'elements/privateMessages'],
+	function (UserName, PrivateMessages) {
 		function Header () {
 			var userName = new UserName(),
-				publicMessages = new PublicMessages(),
 				privateMessages = new PrivateMessages();
 				
 			userName.appendName();

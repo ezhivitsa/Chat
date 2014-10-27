@@ -57,19 +57,19 @@ HttpServer.prototype.stop = function () {
 }
 
 HttpServer.prototype.get = function (path, handler) {
-	this.handlers.get[helpers.trimStr(path, "\/")] = handler;
+	this.handlers.get[helpers.trimStr(path, "\/").toLowerCase()] = handler;
 }
 
 HttpServer.prototype.post = function (path, handler) {
-	this.handlers.post[helpers.trimStr(path, "\/")] = handler;
+	this.handlers.post[helpers.trimStr(path, "\/").toLowerCase()] = handler;
 }
 
 HttpServer.prototype.put = function (path, handler) {
-	this.handlers.put[helpers.trimStr(path, "\/")] = handler;
+	this.handlers.put[helpers.trimStr(path, "\/").toLowerCase()] = handler;
 }
 
 HttpServer.prototype.delete = function (path, handler) {
-	this.handlers.delete[helpers.trimStr(path, "\/")] = handler;
+	this.handlers.delete[helpers.trimStr(path, "\/").toLowerCase()] = handler;
 }
 
 module.exports = HttpServer;

@@ -7,7 +7,7 @@ var HttpServer = require('./httpServer'),
 	events = require('events');
 
 var server = new HttpServer(),
-	eventEmitter = events.EventEmitter,
+	eventEmitter = new events.EventEmitter(),
 	db = new Db(),
 	publicMessages = new PublicMessages(db, eventEmitter);
 
@@ -19,21 +19,21 @@ server.get('user', function (request, response, data, session) {
 		});
 });
 
+server.post('user/update', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.updateName(data.name);
+});
+
 server.get('publicMessages', function (request, response, data, session) {
 	publicMessages.get(response, data);
 });
 
-server.post('publicMessage', function (request, response, data, session) {
+server.post('publicMessages/message', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
 	user.authorization()
 		.then(function(currentUser) {
 			publicMessages.publish(response, data, currentUser);
 		});
-});
-
-<<<<<<< HEAD
-server.get('publicMessages/last/{time}', function (request, response, data, session) {
-	publicMessages.getLast(response, data);
 });
 
 server.get('privateMessages/count', function (request, response, data, session) {
@@ -45,7 +45,5 @@ server.get('privateMessages/count', function (request, response, data, session) 
 		});
 });
 
-=======
->>>>>>> origin/dev
 server.start();
 db.connect();

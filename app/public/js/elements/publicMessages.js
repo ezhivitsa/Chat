@@ -21,21 +21,22 @@ define(['helpers', 'dataSource'],
 		PublicMessages.prototype.init = function (options) {
 			this.opts = Helpers.extend(options, this.defaults);
 
-			this.wrapper = document.querySelector(this.opts.wrapperSelector);
-			this.textarea = document.querySelector(this.opts.textareaSelector);
-			this.button = document.querySelector(this.opts.buttonSelector);
+			this.opts.wrapper = document.querySelector(this.opts.wrapperSelector);
+			this.opts.textarea = document.querySelector(this.opts.textareaSelector);
+			this.opts.button = document.querySelector(this.opts.buttonSelector);
 		}
 
-		PublicMessages.prototype.getOldMessages = function (messages) {
+		PublicMessages.prototype.getOldMessages = function () {
 			var self = this;
 
 			if ( !self.opts.isEnd ) {
-				DataSource.getMessages(this.dateLastMessage, this.limit, function (response, status) {
+				DataSource.getMessages(this.opts.dateLastMessage, -this.opts.limit, function (response, status) {
 					if ( status == 200 ) {
 						for ( var i = response.messages.length - 1; i >= 0 ; i-- ) {
 							self._addMessageOnPage(response.messages[i]);
 						}
 					}
+					self.opts.isEnd = response.isEnd;
 				});
 			}
 		}
@@ -45,12 +46,14 @@ define(['helpers', 'dataSource'],
 
 			this.opts.button.addEventListener('click', function () {
 				var text = self.opts.textarea.value;
-				DataSource.publishPublicMessage(text, this.limit, function (response, status) {
-					if ( status == 201 ) {
-						self._addMessageOnPage(response);
-						self.opts.textarea.value = '';
-					}
-				});
+				if ( text ) {
+					DataSource.publishPublicMessage(text, function (response, status) {
+						if ( status == 201 ) {
+							self._addMessageOnPage(response.message);
+							self.opts.textarea.value = '';
+						}
+					});
+				}
 			});
 		}
 
@@ -64,7 +67,7 @@ define(['helpers', 'dataSource'],
 					.replace('$3', respMes.time)
 					.replace('$4', respMes.message);
 
-			this.wrapper.appendChild(li);
+			this.opts.wrapper.appendChild(li);
 		}
 
 		return PublicMessages;

@@ -1,8 +1,9 @@
-define(['pages/main', 'pages/privateMessages'], 
-	function (MainPage, PrivateMessagesPage) {
+define(['pages/main', 'pages/privateMessages', 'pages/user'], 
+	function (MainPage, PrivateMessagesPage, UserPage) {
 		var pages = {
 			'main': MainPage,
-			'private-messages': PrivateMessagesPage
+			'private-messages': PrivateMessagesPage,
+			'user': UserPage
 		};
 
 		var body = document.querySelector('body'),
@@ -14,6 +15,8 @@ define(['pages/main', 'pages/privateMessages'],
 				currentPage = pages[page];
 				break;
 			}
+		}
+		if ( !currentPage ) {
 			return;
 		}
 

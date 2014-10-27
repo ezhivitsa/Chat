@@ -17,6 +17,7 @@ function PublicMessages(db, eventEmitter) {
 	};
 
 	this.res = [];
+	this.addListener();
 }
 
 PublicMessages.prototype = {
@@ -30,6 +31,8 @@ PublicMessages.prototype = {
 			self.res.forEach(function () {
 				responses.ok(response, { messages: message });
 			});
+
+			self.res = [];
 		});		
 	},
 
@@ -39,15 +42,18 @@ PublicMessages.prototype = {
 		// check content of message field
 		if (typeof data.message === "string" && data.message.length != 0) {
 			var messageObj = {
-				author: author,
+				author: {
+					id: author._id,
+					name: author.name
+				},
 				message: data.message
 			};
 
 			// save message
-			var promise = mongoModels.models.PublicMessage.create(messageObj).exec();
+			var promise = mongoModels.models.PublicMessage.create(messageObj);
 
 			// trigger event of adding public message
-			self.assets.emit('publishPublicMessage', messageObj);
+			self.assets.eventEmitter.emit('publishPublicMessage', messageObj);
 			self.options.lastMessageTime = Date.now();
 			
 			promise.then(function(message) {

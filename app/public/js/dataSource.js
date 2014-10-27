@@ -2,7 +2,8 @@ define([],
 	function () {
 		var domain = '/',
 			urlPatterns = {
-				user: domain + 'user'
+				user: domain + 'user',
+				countNewPrivateMessages: domain + 'privateMessages/count'
 			};
 
 		function createHttpRequest (method, url, callback) {
@@ -21,6 +22,9 @@ define([],
 		return {
 			getUserName: function (callback) {
 				createHttpRequest('get', urlPatterns.user, callback);
+			},
+			countNewPrivateMessages: function (callback) {
+				createHttpRequest('get', urlPatterns.countNewPrivateMessages, callback);
 			}
 		};
 	}

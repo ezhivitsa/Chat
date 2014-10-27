@@ -33,5 +33,14 @@ server.get('publicMessages/last/{time}', function (request, response, data, sess
 	publicMessages.getLast(response, data);
 });
 
+server.get('privateMessages/count', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.authorization()
+		.then(function(currentUser) {
+			var privateMessages = new PrivateMessages(db, response, { author: user });
+			privateMessages.count();
+		});
+});
+
 server.start();
 db.connect();

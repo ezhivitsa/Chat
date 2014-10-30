@@ -43,7 +43,7 @@ PublicMessages.prototype = {
 		if (typeof data.message === "string" && data.message.length != 0) {
 			var messageObj = {
 				author: {
-					id: author._id,
+					_id: author._id,
 					name: author.name
 				},
 				message: data.message
@@ -76,7 +76,7 @@ PublicMessages.prototype = {
 			criteria = {};
 		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
 
-		if ( !data.time || data.time < self.options.lastMessageTime ) {
+		if ( !data.time || !self.options.lastMessageTime || data.time < self.options.lastMessageTime ) {
 			// in the database exist message that we haven't got
 
 			// get limited num of messages from page * limit position
@@ -100,7 +100,7 @@ PublicMessages.prototype = {
 		}
 		else {
 			self.res.push(response);
-			self.res.on('close', function () {
+			response.on('close', function () {
 				self.res.splice(self.res.indexOf(response), 1);
 			});
 		}

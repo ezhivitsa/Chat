@@ -8,6 +8,7 @@ define(['helpers', 'dataSource'],
 				wrapperSelector: '.messages ul',
 				textareaSelector: 'footer textarea',
 				buttonSelector: 'footer button',
+				loadMoreSelector: '.load-more',
 				messageTemplate: '<div>' +
 									'<span class="author"><a href="$1">$2</a></span>' +
 									'<span class="date">$3</span>' +
@@ -24,19 +25,30 @@ define(['helpers', 'dataSource'],
 			this.opts.wrapper = document.querySelector(this.opts.wrapperSelector);
 			this.opts.textarea = document.querySelector(this.opts.textareaSelector);
 			this.opts.button = document.querySelector(this.opts.buttonSelector);
+			this.opts.loadMore = document.querySelector(this.opts.loadMoreSelector);
 		}
 
-		PublicMessages.prototype.getOldMessages = function () {
+		PublicMessages.prototype.getOldMessages = function (methodInsert) {
 			var self = this;
 
 			if ( !self.opts.isEnd ) {
 				DataSource.getMessages(this.opts.dateLastMessage, -this.opts.limit, function (response, status) {
 					if ( status == 200 ) {
-						for ( var i = response.messages.length - 1; i >= 0 ; i-- ) {
-							self._addMessageOnPage(response.messages[i]);
+						var len = response.messages.length;
+						if ( methodInsert === 'prepand' ) {
+							for ( var i = 0; i < len ; i++ ) {
+								self._addMessageOnPage(response.messages[i], methodInsert);
+							}
 						}
+						else {
+							for ( var i = len - 1; i >= 0 ; i-- ) {
+								self._addMessageOnPage(response.messages[i], methodInsert);
+							}							
+						}
+						( len ) && ( self.opts.dateLastMessage = response.messages[len - 1].time );
+						self.opts.isEnd = response.end;
+						( response.end ) && ( self.opts.loadMore.style.display = "none" );
 					}
-					self.opts.isEnd = response.isEnd;
 				});
 			}
 		}
@@ -57,7 +69,17 @@ define(['helpers', 'dataSource'],
 			});
 		}
 
-		PublicMessages.prototype._addMessageOnPage = function (respMes) {
+		PublicMessages.prototype.listenLoadMessages = function () {
+			var self = this;
+
+			this.opts.loadMore.addEventListener('click', function () {
+				self.getOldMessages('prepand');
+			});
+		}
+
+		PublicMessages.prototype._addMessageOnPage = function (respMes, position) {
+			position = position || 'append';
+
 			var li = document.createElement('li');
 
 			li.innerHTML = 
@@ -67,7 +89,18 @@ define(['helpers', 'dataSource'],
 					.replace('$3', respMes.time)
 					.replace('$4', respMes.message);
 
-			this.opts.wrapper.appendChild(li);
+			if ( position === 'append' ) {
+				this.opts.wrapper.appendChild(li);
+			}
+			else {
+				var children = this.opts.wrapper.childNodes;
+				if ( !children.length ) {
+					this.opts.wrapper.appendChild(li);
+				}
+				else {
+					this.opts.wrapper.insertBefore(li, children[0]);
+				}
+			}
 		}
 
 		return PublicMessages;

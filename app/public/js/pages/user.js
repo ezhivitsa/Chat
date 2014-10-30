@@ -4,7 +4,7 @@ define(['elements/header', 'elements/userName'],
 			var header = new Header(),
 				userName = new UserName();
 
-			//userName.
+			userName.listenChangeName();
 		}
 
 		return UserPage;

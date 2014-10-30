@@ -91,11 +91,6 @@ User.prototype.registerNew = function (resolver) {
 					// adding id and token to the user sessiom cookie
 					self.setIdAndToken(user._id, user.token);
 					resolver.resolve(user);
-
-					// responses.created(self.assets.response, {
-					// 	id: user._id,
-					// 	token: user.token
-					// });
 				});
 			}, function (err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
@@ -115,6 +110,8 @@ User.prototype.createUser = function() {
 }
 
 User.prototype.updateUserInfo = function(opts, callback) {
+	opts = opts || {};
+
 	var self = this,
 		id = self.assets.request.csession['id'];
 
@@ -123,24 +120,76 @@ User.prototype.updateUserInfo = function(opts, callback) {
 	}
 
 	var objectId = mongoose.Types.ObjectId(id);
-	createToken(48)
-		.then(function(token) {
-			var updates = helpers.extend({
-				token: token,
-				lastActivity: Date.now()
-			}, opts);
+	createToken()(48)
+		.then(function(buf) {
+			var token = buf.toString('hex'),
+				numUpdates = 0,
+				updates = helpers.extend({
+					token: token,
+					lastActivity: Date.now()
+				}, opts);
 
 
-			mongoModels.models.User.findOneAndUpdate({
-				_id: objectId
-			}, updates, function(err, user) {
+			mongoModels.models.User.findByIdAndUpdate(
+				objectId, 
+				updates, function(err, user) {
 				if (err) {
 					return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 				}
 
 				self.setIdAndToken(id, token);
-				(callback) && callback(user);
+				numUpdates++;
+				if ( !updates.name || numUpdates == 4 ) { 
+					(callback) && callback(user.name);
+				}
 			});
+
+			if ( updates.name ) {
+				mongoModels.models.PublicMessage.update(
+					{ 'author._id': objectId }, 
+					{ 'author.name': updates.name },
+					function (err, messages) {
+						if (err) {
+							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+						}
+
+						numUpdates++;
+						if ( numUpdates == 4 ) { 
+							(callback) && callback(updates.name);
+						}
+					}
+				);
+
+				mongoModels.models.PrivateMessage.update(
+					{ 'author._id': objectId }, 
+					{ 'author.name': updates.name },
+					function (err, messages) {
+						if (err) {
+							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+						}
+
+						numUpdates++;
+						if ( numUpdates == 4 ) { 
+							(callback) && callback(updates.name);
+						}
+					}
+				);
+
+				mongoModels.models.PrivateMessage.update(
+					{ 'recipient._id': objectId }, 
+					{ 'recipient.name': updates.name },
+					function (err, messages) {
+						if (err) {
+							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+						}
+
+						numUpdates++;
+						if ( numUpdates == 4 ) { 
+							(callback) && callback(updates.name);
+						}
+					}
+				);
+			}
 		});
 }
 
@@ -158,22 +207,27 @@ User.prototype.updateName = function(name) {
 
 		if (!user) {
 			// name available to use
-		} else {
+			self.updateUserInfo({
+				name: name
+			}, function(newName) {
+				// 200 ok updated
+				responses.ok(self.assets.response, { name: newName });
+			});
+		} 
+		else {
 			// account with such name already created
-			if (user.lastActivity + ONE_HOUR > new Date()) {
+			if (user.lastActivity.getTime() + ONE_HOUR > new Date()) {
 				// not possible to use this name
 				responses.forbidden(self.assets.response, "This name is already in use");
-			} else {
+			}
+			else {
 				self.assets.request.csession['id'] = user._id;
 				self.id = user._id;
-				self.updateUserInfo();
+				self.updateUserInfo({}, function (newName) {
+					responses.ok(self.assets.response, { name: newName });
+				});
 			}
 		}
-	});
-	this.updateUserInfo({
-		name: this.name
-	}, function() {
-		// 200 ok updated
 	});
 }
 

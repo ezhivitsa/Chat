@@ -32,7 +32,6 @@ define([],
 			xhr.onreadystatechange = function() {
 				//Call a function when the state changes.
 			    if (xhr.readyState == 4) {
-			    	console.log(xhr.responseText)
 					var resp = JSON.parse(xhr.responseText);
 					( callback ) && callback(resp, xhr.status);
 				}

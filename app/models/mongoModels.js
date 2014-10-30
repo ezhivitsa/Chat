@@ -14,7 +14,7 @@ var modelsAndSchemas = {
 		}),
 		publicMessage: new Schema({
 			author: {
-				id: Schema.Types.ObjectId,
+				_id: Schema.Types.ObjectId,
 				name: String
 			},
 			message: String,
@@ -24,11 +24,11 @@ var modelsAndSchemas = {
 		}),
 		privateMessage: new Schema({
 			author: {
-				id: Schema.Types.ObjectId,
+				_id: Schema.Types.ObjectId,
 				name: String
 			},
 			recipient: {
-				id: Schema.Types.ObjectId,
+				_id: Schema.Types.ObjectId,
 				name: String
 			},
 			message: String,
@@ -44,6 +44,6 @@ var modelsAndSchemas = {
 
 modelsAndSchemas.models.User = mongoose.model('User', modelsAndSchemas.schemas.user);
 modelsAndSchemas.models.PublicMessage = mongoose.model('PublicMessage', modelsAndSchemas.schemas.publicMessage);
-modelsAndSchemas.models.privateMessage = mongoose.model('PrivateMessage', modelsAndSchemas.schemas.privateMessage);
+modelsAndSchemas.models.PrivateMessage = mongoose.model('PrivateMessage', modelsAndSchemas.schemas.privateMessage);
 
 module.exports = modelsAndSchemas;

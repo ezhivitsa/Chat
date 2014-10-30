@@ -5,6 +5,7 @@ define(['helpers', 'dataSource'],
 				limit: 10,
 				isEnd: false,
 				dateLastMessage: null,
+				dateFirstMessage: new Date(),
 				wrapperSelector: '.messages ul',
 				textareaSelector: 'footer textarea',
 				buttonSelector: 'footer button',
@@ -43,7 +44,7 @@ define(['helpers', 'dataSource'],
 						else {
 							for ( var i = len - 1; i >= 0 ; i-- ) {
 								self._addMessageOnPage(response.messages[i], methodInsert);
-							}							
+							}
 						}
 						( len ) && ( self.opts.dateLastMessage = response.messages[len - 1].time );
 						self.opts.isEnd = response.end;
@@ -61,7 +62,7 @@ define(['helpers', 'dataSource'],
 				if ( text ) {
 					DataSource.publishPublicMessage(text, function (response, status) {
 						if ( status == 201 ) {
-							self._addMessageOnPage(response.message);
+							//self._addMessageOnPage(response.message);
 							self.opts.textarea.value = '';
 						}
 					});
@@ -84,7 +85,7 @@ define(['helpers', 'dataSource'],
 
 			li.innerHTML = 
 				this.opts.messageTemplate
-					.replace('$1', respMes.author.id)
+					.replace('$1', respMes.author._id)
 					.replace('$2', respMes.author.name)
 					.replace('$3', respMes.time)
 					.replace('$4', respMes.message);
@@ -101,6 +102,29 @@ define(['helpers', 'dataSource'],
 					this.opts.wrapper.insertBefore(li, children[0]);
 				}
 			}
+		}
+
+		PublicMessages.prototype.listenChat = function () {
+			var self = this;
+
+			DataSource.getMessages(self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
+				if ( status == 200 ) {
+					var len = response.messages.length;
+					for ( var i = len - 1; i >= 0 ; i-- ) {
+						self._addMessageOnPage(response.messages[i]);
+					}
+
+					if ( len ) {
+						if ( !self.opts.dateLastMessage ) {
+							self.opts.dateLastMessage = response.messages[len - 1].time;
+						}
+
+						self.opts.dateFirstMessage = response.messages[0].time;
+					}
+				}
+
+				self.listenChat();
+			});
 		}
 
 		return PublicMessages;

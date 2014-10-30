@@ -12,8 +12,8 @@ var http = require('http'),
 
 function HttpServer (opts) {
 	this.defaults = {
-		host: '127.0.0.1',
-		port: 5555,
+		host: '192.168.1.147',
+		port: 80,
 		publicFolder: "./public",		
 		defaultFile: 'index.html'
 	};

@@ -123,7 +123,6 @@ User.prototype.updateUserInfo = function(opts, callback) {
 	createToken()(48)
 		.then(function(buf) {
 			var token = buf.toString('hex'),
-				numUpdates = 0,
 				updates = helpers.extend({
 					token: token,
 					lastActivity: Date.now()
@@ -138,58 +137,8 @@ User.prototype.updateUserInfo = function(opts, callback) {
 				}
 
 				self.setIdAndToken(id, token);
-				numUpdates++;
-				if ( !updates.name || numUpdates == 4 ) { 
-					(callback) && callback(user.name);
-				}
+				(callback) && callback(user.name);
 			});
-
-			if ( updates.name ) {
-				mongoModels.models.PublicMessage.update(
-					{ 'author._id': objectId }, 
-					{ 'author.name': updates.name },
-					function (err, messages) {
-						if (err) {
-							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-						}
-
-						numUpdates++;
-						if ( numUpdates == 4 ) { 
-							(callback) && callback(updates.name);
-						}
-					}
-				);
-
-				mongoModels.models.PrivateMessage.update(
-					{ 'author._id': objectId }, 
-					{ 'author.name': updates.name },
-					function (err, messages) {
-						if (err) {
-							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-						}
-
-						numUpdates++;
-						if ( numUpdates == 4 ) { 
-							(callback) && callback(updates.name);
-						}
-					}
-				);
-
-				mongoModels.models.PrivateMessage.update(
-					{ 'recipient._id': objectId }, 
-					{ 'recipient.name': updates.name },
-					function (err, messages) {
-						if (err) {
-							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-						}
-
-						numUpdates++;
-						if ( numUpdates == 4 ) { 
-							(callback) && callback(updates.name);
-						}
-					}
-				);
-			}
 		});
 }
 

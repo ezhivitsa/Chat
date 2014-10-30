@@ -28,8 +28,8 @@ PublicMessages.prototype = {
 		var self = this;
 
 		self.assets.eventEmitter.on('publishPublicMessage', function (message) {
-			self.res.forEach(function () {
-				responses.ok(response, { messages: message });
+			self.res.forEach(function (response) {
+				responses.ok(response, { messages: [message] });
 			});
 
 			self.res = [];
@@ -53,10 +53,10 @@ PublicMessages.prototype = {
 			var promise = mongoModels.models.PublicMessage.create(messageObj);
 
 			// trigger event of adding public message
-			self.assets.eventEmitter.emit('publishPublicMessage', messageObj);
 			self.options.lastMessageTime = Date.now();
 			
 			promise.then(function(message) {
+				self.assets.eventEmitter.emit('publishPublicMessage', message);
 				responses.created(response, {
 					message: message
 				})
@@ -76,34 +76,36 @@ PublicMessages.prototype = {
 			criteria = {};
 		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
 
-		if ( !data.time || !self.options.lastMessageTime || data.time < self.options.lastMessageTime ) {
-			// in the database exist message that we haven't got
+		if ( data.limit < 0 ) {
+			//get old messages
+			if ( !data.time || !self.options.lastMessageTime || data.time.getTime() < self.options.lastMessageTime.getTime() ) {
+				// get limited num of messages from page * limit position
+				var promise = mongoModels.models.PublicMessage.find({
+						time: criteria
+					})
+					.sort({
+						time: -1
+					}).limit(limit + 1).exec();
 
-			// get limited num of messages from page * limit position
-			var promise = mongoModels.models.PublicMessage.find({
-					time: criteria
-				})
-				.sort({
-					time: -1
-				}).limit(limit + 1).exec();
-
-			promise.then(function(messages) {
-				var end = messages.length <= limit;
-				!end && messages.pop();
-				responses.ok(response, {
-					messages: messages,
-					end: end
+				promise.then(function(messages) {
+					var end = messages.length <= limit;
+					!end && messages.pop();
+					responses.ok(response, {
+						messages: messages,
+						end: end
+					});
+				}, function(err) {
+					return helpers.handleDbErrors(err, self.assets.db, response);
 				});
-			}, function(err) {
-				return helpers.handleDbErrors(err, self.assets.db, response);
-			})
+
+				return;
+			}
 		}
-		else {
-			self.res.push(response);
-			response.on('close', function () {
-				self.res.splice(self.res.indexOf(response), 1);
-			});
-		}
+
+		self.res.push(response);
+		response.on('close', function () {
+			self.res.splice(self.res.indexOf(response), 1);
+		});
 	}
 }
 

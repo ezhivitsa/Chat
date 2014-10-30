@@ -7,6 +7,7 @@ define(['elements/header', 'elements/publicMessages'],
 			publicMessages.getOldMessages()
 			publicMessages.listenAddMessage();
 			publicMessages.listenLoadMessages();
+			publicMessages.listenChat();
 		}
 
 		return MainPage;

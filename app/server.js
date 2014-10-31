@@ -4,12 +4,14 @@ var HttpServer = require('./httpServer'),
 	Db = require('./db'),
 	User = require('./models/user'),
 	PublicMessages = require('./models/publicMessages'),
+	PrivateMessages = require('./models/privateMessages'),
 	events = require('events');
 
 var server = new HttpServer(),
 	eventEmitter = new events.EventEmitter(),
 	db = new Db(),
-	publicMessages = new PublicMessages(db, eventEmitter);
+	publicMessages = new PublicMessages(db, eventEmitter),
+	privateMessages = new PrivateMessages(db, eventEmitter);
 
 server.get('user', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
@@ -22,6 +24,11 @@ server.get('user', function (request, response, data, session) {
 server.post('user/update', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
 	user.updateName(data.name);
+});
+
+server.get('user/id/{id}/info', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.sendUserInfo();
 });
 
 server.get('publicMessages', function (request, response, data, session) {
@@ -40,8 +47,7 @@ server.get('privateMessages/count', function (request, response, data, session) 
 	var user = new User(db, request, response, session, data);
 	user.authorization()
 		.then(function(currentUser) {
-			var privateMessages = new PrivateMessages(db, response, { author: user });
-			privateMessages.count();
+			privateMessages.count(response, db, { author: currentUser });
 		});
 });
 

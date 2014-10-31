@@ -44,7 +44,7 @@ define([],
 				createHttpGet(urlPatterns.user, callback);
 			},
 			countNewPrivateMessages: function (callback) {
-				createHttpRequest('get', urlPatterns.countNewPrivateMessages, callback);
+				createHttpGet(urlPatterns.countNewPrivateMessages, callback);
 				createHttpGet(urlPatterns.user, callback);
 			},
 			getMessages: function (time, limit, callback) {

@@ -262,4 +262,21 @@ User.prototype.getUserByName = function (name) {
 	return resolver.promise;
 }
 
+User.prototype.sendUserInfo = function () {
+	var self = this;
+
+	mongoModels.models.User.findById({ _id: mongoose.Types.ObjectId(self.id) }, function (err, user) {
+		if ( err ) {
+			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+		}
+
+		responses.ok(self.assets.response, { 
+			user: { 
+				id: user.id,
+				name: user.name 
+			}
+		})
+	});
+}
+
 module.exports = User;

@@ -12,8 +12,8 @@ var http = require('http'),
 
 function HttpServer (opts) {
 	this.defaults = {
-		host: 'localhost',
-		port: 5555,
+		host: '192.168.1.147',
+		port: 80,
 		publicFolder: "./public",		
 		defaultFile: 'index.html'
 	};
@@ -34,21 +34,22 @@ HttpServer.prototype.init = function (opts) {
 
 HttpServer.prototype.start = function () {
 	var self = this;
-	if (cluster.isMaster) {
-		var numCPUs = os.cpus().length;
-		for (var i = 0; i < numCPUs; i++) {
-			cluster.fork();
-		}
-	}
-	else {
-		console.log('server was started on process ' + process.pid);
+	// if (cluster.isMaster) {
+	// 	var numCPUs = os.cpus().length;
+	// 	for (var i = 0; i < numCPUs; i++) {
+	// 		cluster.fork();
+	// 	}
+	// }
+	// else {
+	// 	console.log('server was started on process ' + process.pid);
+		console.log('server was started');
 		http.Server(function (request, response) {				
 
 			clientSession.csget(request, response);
 			processRequest(request, response, clientSession, self.handlers, self.options.publicFolder, self.options.defaultFile);
 
-		}).listen(this.options.port, this.options.host);			
-	}
+		}).listen(this.options.port, this.options.host);
+	// }
 
 }
 

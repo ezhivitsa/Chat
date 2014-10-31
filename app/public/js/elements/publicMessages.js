@@ -11,7 +11,7 @@ define(['helpers', 'dataSource'],
 				buttonSelector: 'footer button',
 				loadMoreSelector: '.load-more',
 				messageTemplate: '<div>' +
-									'<span class="author"><a href="$1">$2</a></span>' +
+									'<span class="author"><a href="/private-messages.html/#$1">$2</a></span>' +
 									'<span class="date">$3</span>' +
 								  '</div>' +
 								  '<div class="message">$4</div>'

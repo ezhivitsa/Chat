@@ -5,28 +5,16 @@ var helpers = require('../helpers'),
 	mongoose = require('mongoose'),
 	responses = require('../responses');
 
-function PrivateMessages(db, response, opts) {
-	this.schema = ['author', 'message', 'recipient', 'limit', 'start'];
-
-	this.options = {
-		limit: 10
-	}
-
+function PrivateMessages(db, eventEmitter) {
 	this.assets = {
 		db: db,
-		response: response
+		eventEmitter: eventEmitter
 	};
-
-	this.init(opts);
 }
 
 PrivateMessages.prototype = {
 
-	constructor: privateMessage,
-
-	init: function(opts) {
-		helpers.setShemaData(this.schema, this, opts);
-	},
+	constructor: PrivateMessages,
 
 	publish: function() {
 		var self = this;
@@ -69,20 +57,20 @@ PrivateMessages.prototype = {
 		});
 	},
 
-	count: function() {
+	count: function(response, db, data) {
 		var self = this;
 
-		var promise = mongoModels.models.privateMessage.count({
-			author: self.author,
+		var promise = mongoModels.models.PrivateMessage.count({
+			author: data.author._id,
 			isRead: false
 		}).exec();
 
 		promise.then(function(count) {
-			responses.ok(self.assets.response, {
+			responses.ok(response, {
 				count: count
 			});
 		}, function(err) {
-			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+			return helpers.handleDbErrors(err, db, response);
 		});
 	},
 
@@ -135,4 +123,4 @@ PrivateMessages.prototype = {
 	}
 }
 
-module.exports = privateMessage;
+module.exports = PrivateMessages;

@@ -2,18 +2,24 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<meta name=viewport content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+	<link rel="stylesheet" href="/css/main.css" />
 	<title>Chat</title>
 </head>
 <body class="private-messages">
 	<header>
-		<div class="name"><a href="/change-name.html"></a></div>
-		<div class="private-messages"><a href="/private-messages.html"></a></div>
+		<a href="/" class="back">Back</a>
+		<div class="name"><a href="/user.html"></a></div>
+		<div class="private-messages-count">Number of new private messages: <a href="/private-messages.html"></a></div>
 	</header>
-	<section>
-		
+	<section class="messages">
+		<button class="load-more">Load more messages</button>
+		<ul></ul>
 	</section>
-	<footer></footer>
-	<script data-main="scripts/main.min.js" src="bower_components/requirejs/require.js"></script>
+	<footer>
+		<textarea id="message"></textarea>
+		<button>Send message</button>
+	</footer>
+	<script data-main="/scripts/main.min.js" src="/bower_components/requirejs/require.js"></script>
 </body>
 </html>

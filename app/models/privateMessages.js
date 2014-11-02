@@ -16,6 +16,46 @@ PrivateMessages.prototype = {
 
 	constructor: PrivateMessages,
 
+	count: function(response, db, data) {
+		var self = this;
+
+		var promise = mongoModels.models.PrivateMessage.count({
+			$or: [{user1: data.author._id}, {user2: data.author._id}],
+			'message.$.isRead': false
+		}).exec();
+
+		promise.then(function(count) {
+			responses.ok(response, {
+				count: count
+			});
+		}, function(err) {
+			return helpers.handleDbErrors(err, db, response);
+		});
+	},
+
+	getDialogs: function (responce, db, user) {
+		mongoModels.models.PrivateMessages.find({
+			$or: [{user1: data.author._id}, {user2: data.author._id}]
+		}, function (err, dialogs) {
+			if (err) {
+				helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+			}
+
+			for ( var i = 0; i < dialogs.length; i++ ) {
+				dialogs[i].messages = {
+					all: dialogs[i].messages.length,
+					new: dialogs[i].messages.filter(function (message) {
+						return message.isRead === true;
+					}).length
+				}
+			}
+
+			responses.ok(response, {
+				dialogs: dialogs
+			});
+		});
+	},
+
 	publish: function() {
 		var self = this;
 
@@ -54,23 +94,6 @@ PrivateMessages.prototype = {
 			}, function(err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			});
-		});
-	},
-
-	count: function(response, db, data) {
-		var self = this;
-
-		var promise = mongoModels.models.PrivateMessage.count({
-			author: data.author._id,
-			isRead: false
-		}).exec();
-
-		promise.then(function(count) {
-			responses.ok(response, {
-				count: count
-			});
-		}, function(err) {
-			return helpers.handleDbErrors(err, db, response);
 		});
 	},
 

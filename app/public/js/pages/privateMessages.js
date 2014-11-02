@@ -5,7 +5,10 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 				privateMessages = new PrivateMessages();
 
 			if ( window.location.hash ) {
-
+				// show interlocutor info and dialog with him
+			}
+			else {
+				// show all dialogs
 			}
 		}
 

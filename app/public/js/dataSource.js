@@ -3,10 +3,13 @@ define([],
 		var domain = '/',
 			urlPatterns = {
 				user: domain + 'user',
+				userInfo: domain + 'user/id/$1/info',
 				countNewPrivateMessages: domain + 'privateMessages/count',
 				publicMessages: domain + 'publicMessages',
 				message: domain + 'publicMessages/message',
-				userUpdate: domain + 'user/update'
+				userUpdate: domain + 'user/update',
+				dialogs: domain + 'dialogs/all',
+				dialog: domain + 'dialog/id/$1'
 			};
 
 		function createHttpGet (url, callback) {
@@ -43,9 +46,12 @@ define([],
 			getUserName: function (callback) {
 				createHttpGet(urlPatterns.user, callback);
 			},
+			getUserNameById: function (id, callback) {
+				var url = urlPatterns.userInfo.replace('$1', id);
+				createHttpGet(url, callback);
+			},
 			countNewPrivateMessages: function (callback) {
 				createHttpGet(urlPatterns.countNewPrivateMessages, callback);
-				createHttpGet(urlPatterns.user, callback);
 			},
 			getMessages: function (time, limit, callback) {
 				var url = urlPatterns.publicMessages + '?';
@@ -59,6 +65,15 @@ define([],
 			},
 			updateName: function (name, callback) {
 				createHttpPost({ name: name }, urlPatterns.userUpdate, callback);
+			},
+			getDialogs: function (callback) {
+				createHttpGet(urlPatterns.dialogs, callback);
+			},
+			getDialog: function (id, time, limit, callback) {
+				var url = urlPatterns.dialog.replace('$1', id) + '?';
+				( time ) && ( url += 'time=' + time + '&' );
+				( limit ) && ( url += 'limit=' + limit );
+				createHttpGet();
 			}
 		};
 	}

@@ -23,17 +23,19 @@ var modelsAndSchemas = {
 			collection: 'publicMessages'
 		}),
 		privateMessage: new Schema({
-			author: {
+			user1: {
 				_id: Schema.Types.ObjectId,
 				name: String
 			},
-			recipient: {
+			user2: {
 				_id: Schema.Types.ObjectId,
 				name: String
 			},
-			message: String,
-			time: { type: Date, default: Date.now },
-			isRead: { type: Boolean, default: false }
+			messages: [{
+				message: String,
+				time: { type: Date, default: Date.now },
+				isRead: { type: Boolean, default: false }
+			}]
 		}, {
 			collection: 'privateMessages'
 		}),

@@ -51,5 +51,13 @@ server.get('privateMessages/count', function (request, response, data, session) 
 		});
 });
 
+server.get('dialogs/all', function (request, response, data, sessio) {
+	var user = new User(db, request, response, session, data);
+	user.authorization()
+		.then(function(currentUser) {
+			privateMessages.getDialogs(response, db, currentUser);
+		});
+});
+
 server.start();
 db.connect();

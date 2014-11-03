@@ -34,6 +34,9 @@ var modelsAndSchemas = {
 			messages: [{
 				message: String,
 				time: { type: Date, default: Date.now },
+				sender: {
+					_id: Schema.Types.ObjectId
+				},
 				isRead: { type: Boolean, default: false }
 			}]
 		}, {

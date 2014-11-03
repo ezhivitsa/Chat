@@ -9,7 +9,7 @@ define([],
 				message: domain + 'publicMessages/message',
 				userUpdate: domain + 'user/update',
 				dialogs: domain + 'dialogs/all',
-				dialog: domain + 'dialog/id/$1'
+				dialog: domain + 'dialogs/dialog/id/$1'
 			};
 
 		function createHttpGet (url, callback) {
@@ -74,7 +74,12 @@ define([],
 				( time ) && ( url += 'time=' + time + '&' );
 				( limit ) && ( url += 'limit=' + limit );
 				createHttpGet();
-			}
+			},
+			publishPrivateMessage: function (id, message, callback) {
+				var url = urlPatterns.dialog.replace('$1', id);
+				
+				createHttpPost({ message: message }, url, callback);
+			},
 		};
 	}
 );

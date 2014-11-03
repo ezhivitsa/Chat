@@ -54,6 +54,7 @@ PublicMessages.prototype = {
 					_id: author._id,
 					name: author.name
 				},
+				time: new Date(),
 				message: data.message
 			};
 
@@ -61,10 +62,11 @@ PublicMessages.prototype = {
 			var promise = mongoModels.models.PublicMessage.create(messageObj);
 
 			// trigger event of adding public message
-			self.options.lastMessageTime = Date.now();
+			self.assets.eventEmitter.emit('publishPublicMessage', message);
+
+			self.options.lastMessageTime = messageObj.time.getTime();
 			
 			promise.then(function(message) {
-				self.assets.eventEmitter.emit('publishPublicMessage', message);
 				responses.created(response, {
 					message: message
 				})
@@ -106,23 +108,6 @@ PublicMessages.prototype = {
 				}
 			}
 		}
-
-		// if ( data.limit < 0 ) {
-		// 	//get old messages
-		// 	if ( !data.time || !self.options.lastMessageTime || data.time.getTime() < self.options.lastMessageTime.getTime() ) {
-		// 		// get limited num of messages from page * limit position
-				
-		// 	}
-		// 	else {
-				
-		// 	}
-		// }
-		// else {
-		// 	self.res.push(response);
-		// 	response.on('close', function () {
-		// 		self.res.splice(self.res.indexOf(response), 1);
-		// 	});
-		// }
 	},
 
 	_sendMessages: function (limit, criteria, response) {

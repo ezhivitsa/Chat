@@ -6,9 +6,13 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 
 			if ( window.location.hash ) {
 				// show interlocutor info and dialog with him
+				privateMessages.appendInterlocutorName();
+				privateMessages.loadOldMessages();
 			}
 			else {
 				// show all dialogs
+				privateMessages.hideLoadMore();
+				privateMessages.hideHideTextarea();
 			}
 		}
 

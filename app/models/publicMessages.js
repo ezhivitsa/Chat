@@ -62,7 +62,7 @@ PublicMessages.prototype = {
 			var promise = mongoModels.models.PublicMessage.create(messageObj);
 
 			// trigger event of adding public message
-			self.assets.eventEmitter.emit('publishPublicMessage', message);
+			self.assets.eventEmitter.emit('publishPublicMessage', messageObj);
 
 			self.options.lastMessageTime = messageObj.time.getTime();
 			

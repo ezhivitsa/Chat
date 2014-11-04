@@ -18,7 +18,7 @@ function createToken() {
 }
 
 function User(db, request, response, session, opts) {
-	this.schema = ['id', 'name'];
+	this.schema = ['id', 'name', 'lat', 'long'];
 
 	this.options = {
 		standardName: 'anonimous'
@@ -55,11 +55,14 @@ User.prototype.authorization = function(opts) {
 				// user was not found or some anouther user already use this account
 				self.setIdAndToken(null, null);
 				self.registerNew(resolver);
-			}
-			else {
+			} else {
 				// user identified
 				self.setIdAndToken(user._id, user.token);
 				self.name = user.name;
+				if (typeof self.lat == "number" && typeof self.long == "number") {
+					user.geolocation.lat = self.lat;
+					user.geolocation.long = self.long;
+				}
 				resolver.resolve(user);
 			}
 		}, function(err) {
@@ -73,16 +76,16 @@ User.prototype.authorization = function(opts) {
 	return resolver.promise;
 }
 
-User.prototype.registerNew = function (resolver) {
+User.prototype.registerNew = function(resolver) {
 	var self = this;
 
 	var promise = countUsers();
-	promise.then(function (count) {
+	promise.then(function(count) {
 
 		self.name = self.options.standardName + count;
 
 		createToken()(48)
-			.then(function (buf) {
+			.then(function(buf) {
 				var token = buf.toString('hex');
 				self.token = token;
 				var createPromise = self.createUser();
@@ -92,10 +95,10 @@ User.prototype.registerNew = function (resolver) {
 					self.setIdAndToken(user._id, user.token);
 					resolver.resolve(user);
 				});
-			}, function (err) {
+			}, function(err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			});
-	}, function (err) {
+	}, function(err) {
 		return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 	});
 }
@@ -131,31 +134,36 @@ User.prototype.updateUserInfo = function(opts, callback) {
 
 
 			mongoModels.models.User.findByIdAndUpdate(
-				objectId, 
+				objectId,
 				updates, function(err, user) {
-				if (err) {
-					return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-				}
+					if (err) {
+						return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+					}
 
-				self.setIdAndToken(id, token);
-				numUpdates++;
-				if ( numUpdates == 2 ) { 
-					(callback) && callback(updates.name);
-				}
-			});
+					self.setIdAndToken(id, token);
+					numUpdates++;
+					if (numUpdates == 2) {
+						(callback) && callback(updates.name);
+					}
+				});
 
-			if ( updates.name ) {
-				mongoModels.models.PublicMessage.update(
-					{ 'author._id': objectId }, 
-					{ $set: { "author.name": updates.name } },
-					{ multi: true },
-					function (err, messages) {
+			if (updates.name) {
+				mongoModels.models.PublicMessage.update({
+						'author._id': objectId
+					}, {
+						$set: {
+							"author.name": updates.name
+						}
+					}, {
+						multi: true
+					},
+					function(err, messages) {
 						if (err) {
 							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 						}
 
 						numUpdates++;
-						if ( numUpdates == 2 ) { 
+						if (numUpdates == 2) {
 							(callback) && callback(updates.name);
 						}
 					}
@@ -163,6 +171,28 @@ User.prototype.updateUserInfo = function(opts, callback) {
 			}
 		});
 }
+
+User.prototype.updateGeolocation = function() {
+	var self = this,
+		id = self.assets.request.csession['id'],
+		geolocation = {};
+	if (!id) {
+		return;
+	}
+	if (typeof self.lat == "number" && typeof self.long == "number") {
+		geolocation.lat = self.lat;
+		geolocation.long = self.long;
+	}
+	var objectId = mongoose.Types.ObjectId(id);
+	mongoModels.models.User.findByIdAndUpdate(objectId, {
+		geolocation: geolocation
+	}, function(err, user) {
+		if (err) {
+			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+		}
+		responses.ok(self.assets.response)
+	});
+};
 
 User.prototype.updateName = function(name) {
 	var self = this;
@@ -182,20 +212,22 @@ User.prototype.updateName = function(name) {
 				name: name
 			}, function(newName) {
 				// 200 ok updated
-				responses.ok(self.assets.response, { name: newName });
+				responses.ok(self.assets.response, {
+					name: newName
+				});
 			});
-		} 
-		else {
+		} else {
 			// account with such name already created
 			if (user.lastActivity.getTime() + ONE_HOUR > new Date()) {
 				// not possible to use this name
 				responses.forbidden(self.assets.response, "This name is already in use");
-			}
-			else {
+			} else {
 				self.assets.request.csession['id'] = user._id;
 				self.id = user._id;
-				self.updateUserInfo({}, function (newName) {
-					responses.ok(self.assets.response, { name: newName });
+				self.updateUserInfo({}, function(newName) {
+					responses.ok(self.assets.response, {
+						name: newName
+					});
 				});
 			}
 		}
@@ -210,17 +242,21 @@ User.prototype.setIdAndToken = function(id, token) {
 	this.assets.session.csset(this.assets.request, this.assets.response);
 }
 
-User.prototype.sendName = function () {
+User.prototype.sendName = function() {
 	var self = this;
-	responses.ok(self.assets.response, { name: self.name });
+	responses.ok(self.assets.response, {
+		name: self.name
+	});
 }
 
-User.prototype.getUserByName = function (name) {
+User.prototype.getUserByName = function(name) {
 	var resolver = Promise.defer(),
 		name = name || self.name;
 
-	mongoModels.models.User.findOne({ name: name }, function (err, user) {
-		if ( err ) {
+	mongoModels.models.User.findOne({
+		name: name
+	}, function(err, user) {
+		if (err) {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		}
 
@@ -230,18 +266,20 @@ User.prototype.getUserByName = function (name) {
 	return resolver.promise;
 }
 
-User.prototype.sendUserInfo = function () {
+User.prototype.sendUserInfo = function() {
 	var self = this;
 
-	mongoModels.models.User.findById({ _id: mongoose.Types.ObjectId(self.id) }, function (err, user) {
-		if ( err ) {
+	mongoModels.models.User.findById({
+		_id: mongoose.Types.ObjectId(self.id)
+	}, function(err, user) {
+		if (err) {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		}
 
-		responses.ok(self.assets.response, { 
-			user: { 
+		responses.ok(self.assets.response, {
+			user: {
 				id: user.id,
-				name: user.name 
+				name: user.name
 			}
 		})
 	});

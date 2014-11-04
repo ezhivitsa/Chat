@@ -26,6 +26,11 @@ server.post('user/update', function (request, response, data, session) {
 	user.updateName(data.name);
 });
 
+server.post('user/geolocate', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.updateGeolocation();
+});
+
 server.get('user/id/{id}/info', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
 	user.sendUserInfo();

@@ -73,11 +73,11 @@ define([],
 				var url = urlPatterns.dialog.replace('$1', id) + '?';
 				( time ) && ( url += 'time=' + time + '&' );
 				( limit ) && ( url += 'limit=' + limit );
-				createHttpGet();
+				createHttpGet(url, callback);
 			},
 			publishPrivateMessage: function (id, message, callback) {
 				var url = urlPatterns.dialog.replace('$1', id);
-				
+
 				createHttpPost({ message: message }, url, callback);
 			},
 		};

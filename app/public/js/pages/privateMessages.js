@@ -8,11 +8,13 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 				// show interlocutor info and dialog with him
 				privateMessages.appendInterlocutorName();
 				privateMessages.loadOldMessages();
+				privateMessages.listenAddMessage();
 			}
 			else {
 				// show all dialogs
 				privateMessages.hideLoadMore();
 				privateMessages.hideHideTextarea();
+				privateMessages.appendAllDialogs();
 			}
 		}
 

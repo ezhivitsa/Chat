@@ -5,7 +5,7 @@ define(['dataSource', 'helpers'],
 				parentSelector: "header",
 				linkSelector: ".private-messages-count a",
 				loadMoreSelector: '.load-more',
-				ulSelector: 'section ul',
+				wrapperSelector: 'section ul',
 				textareaSelector: '#message',
 				buttonSelector: 'footer button',
 				interlocutorSelector: '.interlocutor',
@@ -13,8 +13,8 @@ define(['dataSource', 'helpers'],
 				isEnd: false,
 				dateLastMessage: null,
 				dateFirstMessage: new Date(),
-				commonDialogTemplate: '<li><a href="/private-messages.js/#$1">$2 <span>$3</span></a></li>',
-				dialogTemplate: '<li class="$1"><span class="author">$2</span><span class="message">$3</span></li>'
+				commonDialogTemplate: '<li><a href="/private-messages.html/#$1">$2</a> <span>Number of messages: $3</span></li>',
+				dialogTemplate: '<li class="$1"><span class="message">$2</span></li>'
 			};
 
 			this.init();
@@ -26,7 +26,7 @@ define(['dataSource', 'helpers'],
 			this.opts.parent = document.querySelector(this.opts.parentSelector);
 			this.opts.link = document.querySelector(this.opts.linkSelector);
 			this.opts.loadMore = document.querySelector(this.opts.loadMoreSelector);
-			this.opts.ul = document.querySelector(this.opts.ulSelector);
+			this.opts.wrapper = document.querySelector(this.opts.wrapperSelector);
 			this.opts.textarea = document.querySelector(this.opts.textareaSelector);
 			this.opts.button = document.querySelector(this.opts.buttonSelector);
 			this.opts.interlocutor = document.querySelector(this.opts.interlocutorSelector);
@@ -45,14 +45,21 @@ define(['dataSource', 'helpers'],
 
 			DataSource.getDialogs(function (response, status) {
 				if ( status == 200 ) {
+					var result = "";
 					for ( var i = 0; i < response.dialogs.length; i++ ) {
+						result += 
+							self.opts.commonDialogTemplate
+								.replace('$1', response.dialogs[i].interlocutor._id)
+								.replace('$2', response.dialogs[i].interlocutor.name)
+								.replace('$3', response.dialogs[i].messages.all);
 
 					}
+					self.opts.wrapper.innerHTML = result;
 				}
 			});
 		}
 
-		PrivateMessages.prototype.loadOldMessages = function () {
+		PrivateMessages.prototype.loadOldMessages = function (methodInsert) {
 			var self = this,
 				id = window.location.hash.substring(1);
 
@@ -78,17 +85,15 @@ define(['dataSource', 'helpers'],
 			}
 		}
 
-		PublicMessages.prototype._addMessageOnPage = function (respMes, position) {
+		PrivateMessages.prototype._addMessageOnPage = function (respMes, position) {
 			position = position || 'append';
 
 			var li = document.createElement('li');
 
 			li.innerHTML = 
-				this.opts.messageTemplate
-					.replace('$1', respMes.author._id)
-					.replace('$2', respMes.author.name)
-					.replace('$3', respMes.time)
-					.replace('$4', respMes.message);
+				this.opts.dialogTemplate
+					.replace('$1', respMes.sender ? 'my' : '')
+					.replace('$2', respMes.message);
 
 			if ( position === 'append' ) {
 				this.opts.wrapper.appendChild(li);
@@ -135,7 +140,7 @@ define(['dataSource', 'helpers'],
 			});
 		}
 
-		PublicMessages.prototype.listenAddMessage = function () {
+		PrivateMessages.prototype.listenAddMessage = function () {
 			var self = this,
 				id = window.location.hash.substring(1);
 
@@ -149,6 +154,29 @@ define(['dataSource', 'helpers'],
 						}
 					});
 				}
+			});
+		}
+
+		PrivateMessages.prototype.listenChat = function () {
+			var self = this;
+
+			DataSource.getDialog(self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
+				if ( status == 200 ) {
+					var len = response.messages.length;
+					for ( var i = len - 1; i >= 0 ; i-- ) {
+						self._addMessageOnPage(response.messages[i]);
+					}
+
+					if ( len ) {
+						if ( !self.opts.dateLastMessage ) {
+							self.opts.dateLastMessage = response.messages[len - 1].time;
+						}
+
+						self.opts.dateFirstMessage = response.messages[0].time;
+					}
+				}
+
+				self.listenChat();
 			});
 		}
 

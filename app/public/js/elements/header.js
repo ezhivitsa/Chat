@@ -5,7 +5,7 @@ define(['elements/userName', 'elements/privateMessages'],
 				privateMessages = new PrivateMessages();
 				
 			userName.appendName();
-			privateMessages.appendCount();
+			// privateMessages.appendCount();
 		}
 
 		return Header;

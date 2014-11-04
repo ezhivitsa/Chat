@@ -11,6 +11,10 @@ function PrivateMessages(db, eventEmitter) {
 		eventEmitter: eventEmitter
 	};
 
+	this.options = {
+		limit: 10
+	};
+
 	this.res = {};
 }
 
@@ -21,13 +25,14 @@ PrivateMessages.prototype = {
 	init: function () {
 		var self = this;
 
-		self.assets.eventEmitter.on('publishPrivateMessage', function (message) {
-			if ( self.res )
-			responses.ok(self.res[i], { 
-				messages: [message]
-			});
-
-			self.res = [];
+		self.assets.eventEmitter.on('publishPrivateMessage', function (message, recipient) {
+			if ( self.res.recipient ) {
+				responses.ok(self.res[i], { 
+					messages: [message]
+				});
+				
+				self.res = null;
+			}
 		});
 	},
 
@@ -35,8 +40,8 @@ PrivateMessages.prototype = {
 		var self = this;
 
 		var promise = mongoModels.models.PrivateMessage.count({
-			$or: [{user1: data.author._id}, {user2: data.author._id}],
-			'message.$.isRead': false
+			$or: [{'user1._id': data.author._id}, {'user2._id': data.author._id}],
+			'message.isRead': false
 		}).exec();
 
 		promise.then(function(count) {
@@ -48,101 +53,184 @@ PrivateMessages.prototype = {
 		});
 	},
 
-	getDialogs: function (responce, db, user) {
-		mongoModels.models.PrivateMessages.find({
-			$or: [{user1: user._id}, {user2: user._id}]
+	getDialogs: function (response, db, user) {
+		mongoModels.models.PrivateMessage.find({
+			$or: [{'user1._id': user._id}, {'user2._id': user._id}]
 		}, function (err, dialogs) {
 			if (err) {
-				helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+				helpers.handleDbErrors(err, self.assets.db, response);
 			}
 
+			var result = [];
+
 			for ( var i = 0; i < dialogs.length; i++ ) {
-				dialogs[i].messages = {
-					all: dialogs[i].messages.length,
-					new: dialogs[i].messages.filter(function (message) {
-						return message.isRead === true;
-					}).length
-				}
+				result[i] = {
+					messages: {
+						all: dialogs[i].messages.length,
+						new: dialogs[i].messages.filter(function (message) {
+							return (message.isRead === true) && ( message.sender._id.toString() !== user._id.toString() );
+						}).length
+					},
+					interlocutor: ( dialogs[i].user1._id.toString() !== user._id.toString() ) ? dialogs[i].user1 : dialogs[i].user2
+				};
 			}
 
 			responses.ok(response, {
-				dialogs: dialogs
+				dialogs: result
 			});
 		});
 	},
 
 	publish: function(response, db, data, user) {
-		var self = this;
+		var self = this,
+			message = {},
+			objectId = mongoose.Types.ObjectId(data.id);
 
 		if (typeof data.message !== "string" || data.message.length == 0) {
 			responses.badRequest(self.assets.response, "Bad or empty recipient");
 			return;
 		}
 
-		mongoModels.models.privateMessage.findOneAndUpdate(
-		{ $or: [{user1: user._id}, {user2: user._id}] }, 
-		{
-			$push: {
-				messages: {
-					message: data.message,
-					sender: mongoose.Types.ObjectId(data.id)
-				}
-			}
-		}, 
-		{safe: true, upsert: true},
-		function (err, dialog) {
+		message = {
+			message: data.message,
+			sender: {
+				_id: user._id
+			},
+			time: new Date(),
+			isRead: false
+		};
+
+		mongoModels.models.PrivateMessage.findOne({ 
+			$or: [
+					{
+						$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
+					},
+					{
+						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
+					}
+				]
+		}, function (err, dialog) {
 			if ( err ) {
 				helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 			}
 
-			// trigger event of send private message
-			self.assets.eventEmitter.emit('publishPrivateMessage', message);
-			responses.created(response, {
-				message: message
-			});
+			if ( !dialog ) {
+				// dialog doesn't exist and it's need to create it
+				mongoModels.models.User.findById(objectId, function (err, interlocutor) {
+					if ( err ) {
+						helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+					}
+
+					mongoModels.models.PrivateMessage.create({
+						user1: {
+							_id: user._id,
+							name: user.name
+						},
+						user2: {
+							_id: objectId,
+							name: interlocutor.name
+						},
+						messages: []
+					}, function (err, dialog) {
+						if ( err ) {
+							helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+						}
+
+						self._updateDialog(response, message, user._id, objectId);
+					});
+				});
+			}
+			else {
+				self._updateDialog(response, message, user._id, objectId);
+			}
 		});
+
+		
 	},
 
-	get: function() {
+	_updateDialog: function (response, message, id1, id2) {
+		var self = this;
+
+		mongoModels.models.PrivateMessage.findOneAndUpdate(
+			{ 
+				$or: [
+					{
+						$and: [{'user1._id': id1}, {'user2._id': id2} ]
+					},
+					{
+						$and: [{'user1._id': id2}, {'user2._id': id1} ],
+					}
+				]
+			}, 
+			{
+				$push: {
+					messages: message
+				}
+			}, 
+			{safe: true, upsert: true},
+			function (err, dialog) {
+				if ( err ) {
+					helpers.handleDbErrors(err, self.assets.db, response);
+				}
+
+				// trigger event of send private message
+				self.assets.eventEmitter.emit('publishPrivateMessage', message);
+				responses.created(response, {
+					message: message
+				});
+			}
+		);
+	},
+
+	get: function(response, data, user) {
 		var self = this,
 			limit = Math.abs(data.limit) || self.options.limit,
 			criteria = {};
 		criteria[data.limit > 0 ? '$gt' : '$lt'] = data.time ? new Date(data.time) : new Date();
 
-		if ( data.limit < 0 ) {
+		if ( data.limit && data.limit < 0 ) {
 			// old messages
-			self._sendMessages(limit, criteria, response);
+			self._sendMessages(response, data, user, limit, criteria);
 		}
 		else {
 			// new messages
-			if ( !data.time ) {
-				responses.badRequest(response);
-			}
-			else {
-				if ( self.options.lastMessageTime && new Date(data.time).getTime() < self.options.lastMessageTime ) {
-					self._sendMessages(limit, criteria, response);
-				}
-				else {
-					self.res.push(response);
-					response.on('close', function () {
-						self.res.splice(self.res.indexOf(response), 1);
-					});
-				}
-			}
+			self.res[user._id] = {};
+			self.res[user._id][data.id] = response;
+
+			response.on('close', function () {
+				self.res[user._id][data.id] = null;
+			});
 		}		
 	},
 
-	_sendMessages: function (limit, criteria, response) {
-		var self = this;
+	_sendMessages: function (response, data, user, limit, criteria) {
+		var self = this,
+			objectId = mongoose.Types.ObjectId(data.id);
 
-		var promise = mongoModels.models.PublicMessage.find({
-				time: criteria
-			})
-			.sort({
-				time: -1
-			}).limit(limit + 1).exec();
+		var promise = mongoModels.models.PrivateMessage.find(
+			{ 
+				$or: [
+					{
+						$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
+					},
+					{
+						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
+					}
+				] 
+			},
+			{ messages: [{ time: criteria }] }
+			)
+			.sort({ 'messages.time': -1 })
+			.limit(limit + 1).exec();
 
 		promise.then(function(messages) {
+
+			messages = ( messages.length ) ? messages[0].messages : [];
+
+			for ( var i = 0; i < messages.length; i++ ) {
+				messages[i].sender = user._id.toString() === messages[i].sender._id.toString();
+			}
+
 			var end = messages.length <= limit;
 			!end && messages.pop();
 			responses.ok(response, {

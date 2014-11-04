@@ -59,11 +59,19 @@ server.get('dialogs/all', function (request, response, data, session) {
 		});
 });
 
-server.get('dialogs/dialog/id/{id}', function (request, response, data, session) {
+server.post('dialogs/dialog/id/{id}', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
 	user.authorization()
 		.then(function(currentUser) {
 			privateMessages.publish(response, db, data, currentUser);
+		});
+});
+
+server.get('dialogs/dialog/id/{id}', function (request, response, data, session) {
+	var user = new User(db, request, response, session, data);
+	user.authorization()
+		.then(function(currentUser) {
+			privateMessages.get(response, data, currentUser);
 		});
 });
 

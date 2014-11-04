@@ -41,7 +41,7 @@ PublicMessages.prototype = {
 			}
 
 			self.res = [];
-		});		
+		});
 	},
 
 	publish: function(response, data, author) {

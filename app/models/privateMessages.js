@@ -26,6 +26,9 @@ PrivateMessages.prototype = {
 		var self = this;
 
 		self.assets.eventEmitter.on('publishPrivateMessage', function (message, user1, user2) {
+			console.log(user1);
+			console.log(user2);
+
 			self._sendMessageToUser(user1);
 			self._sendMessageToUser(user2);
 		});
@@ -105,7 +108,7 @@ PrivateMessages.prototype = {
 			isRead: false
 		};
 
-		self.assets.eventEmitter.emit('publishPrivateMessage', message);
+		self.assets.eventEmitter.emit('publishPrivateMessage', message, id1, id2);
 
 		mongoModels.models.PrivateMessage.findOne({ 
 			$or: [
@@ -184,7 +187,7 @@ PrivateMessages.prototype = {
 		var self = this,
 			objectId = mongoose.Types.ObjectId(data.id);
 
-		var promise = mongoModels.models.PrivateMessage.find(
+		var promise = mongoModels.models.PrivateMessage.findOne(
 			{ 
 				$or: [
 					{
@@ -194,21 +197,24 @@ PrivateMessages.prototype = {
 						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
 					}
 				]
-			},
-			{ 
-				messages: [{ time: criteria }]
 			}
 			)
-			.sort({ 'time': -1 })
-			.limit(limit + 1).exec();
+			.exec();
 
-		promise.then(function(messages) {
+		promise.then(function(privateMessages) {
 
-			if ( !messages.length ) {
+			if ( !privateMessages.length ) {
 				self._checkExistingDialog(response, user, objectId);
 			}
 
-			messages = ( messages.length ) ? messages[0].messages : [];
+			var time = (data.time) ? new Date(data.time).getTime() : Date.now(),
+				messages = ( privateMessages.messages.length ) ? privateMessages.messages : [];
+
+			//console.log(messages)
+
+			messages = messages.filter(function (message) {
+				return message.time.getTime() < time;
+			}).reverse().slice(0, limit + 1);
 
 			for ( var i = 0; i < messages.length; i++ ) {
 				messages[i].sender = user._id.toString() === messages[i].sender._id.toString();

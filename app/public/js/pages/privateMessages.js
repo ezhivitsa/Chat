@@ -10,6 +10,7 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 				privateMessages.loadOldMessages();
 				privateMessages.listenAddMessage();
 				privateMessages.listenChat();
+				privateMessages.listenLoadMessages();
 			}
 			else {
 				// show all dialogs

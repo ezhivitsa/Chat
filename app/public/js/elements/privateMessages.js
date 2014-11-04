@@ -181,6 +181,14 @@ define(['dataSource', 'helpers'],
 			});
 		}
 
+		PrivateMessages.prototype.listenLoadMessages = function () {
+			var self = this;
+
+			this.opts.loadMore.addEventListener('click', function () {
+				self.loadOldMessages('prepand');
+			});
+		}
+
 		return PrivateMessages;
 	}
 );

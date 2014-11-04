@@ -9,6 +9,7 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 				privateMessages.appendInterlocutorName();
 				privateMessages.loadOldMessages();
 				privateMessages.listenAddMessage();
+				privateMessages.listenChat();
 			}
 			else {
 				// show all dialogs

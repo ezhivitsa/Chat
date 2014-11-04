@@ -158,9 +158,10 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.listenChat = function () {
-			var self = this;
+			var self = this,
+				id = window.location.hash.substring(1);
 
-			DataSource.getDialog(self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
+			DataSource.getDialog(id, self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
 				if ( status == 200 ) {
 					var len = response.messages.length;
 					for ( var i = len - 1; i >= 0 ; i-- ) {

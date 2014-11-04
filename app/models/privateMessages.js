@@ -25,15 +25,20 @@ PrivateMessages.prototype = {
 	init: function () {
 		var self = this;
 
-		self.assets.eventEmitter.on('publishPrivateMessage', function (message, recipient) {
-			if ( self.res.recipient ) {
-				responses.ok(self.res[i], { 
-					messages: [message]
-				});
-				
-				self.res = null;
-			}
+		self.assets.eventEmitter.on('publishPrivateMessage', function (message, user1, user2) {
+			self._sendMessageToUser(user1);
+			self._sendMessageToUser(user2);
 		});
+	},
+
+	_sendMessageToUser: function (id) {
+		if ( self.res.id ) {
+			responses.ok(self.res.id, { 
+				messages: [message]
+			});
+			
+			self.res.id = null;
+		}
 	},
 
 	count: function(response, db, data) {
@@ -100,6 +105,8 @@ PrivateMessages.prototype = {
 			isRead: false
 		};
 
+		self.assets.eventEmitter.emit('publishPrivateMessage', message);
+
 		mongoModels.models.PrivateMessage.findOne({ 
 			$or: [
 					{
@@ -111,41 +118,11 @@ PrivateMessages.prototype = {
 				]
 		}, function (err, dialog) {
 			if ( err ) {
-				helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+				helpers.handleDbErrors(err, self.assets.db, response);
 			}
 
-			if ( !dialog ) {
-				// dialog doesn't exist and it's need to create it
-				mongoModels.models.User.findById(objectId, function (err, interlocutor) {
-					if ( err ) {
-						helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-					}
-
-					mongoModels.models.PrivateMessage.create({
-						user1: {
-							_id: user._id,
-							name: user.name
-						},
-						user2: {
-							_id: objectId,
-							name: interlocutor.name
-						},
-						messages: []
-					}, function (err, dialog) {
-						if ( err ) {
-							helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-						}
-
-						self._updateDialog(response, message, user._id, objectId);
-					});
-				});
-			}
-			else {
-				self._updateDialog(response, message, user._id, objectId);
-			}
-		});
-
-		
+			self._updateDialog(response, message, user._id, objectId);
+		});		
 	},
 
 	_updateDialog: function (response, message, id1, id2) {
@@ -174,7 +151,7 @@ PrivateMessages.prototype = {
 				}
 
 				// trigger event of send private message
-				self.assets.eventEmitter.emit('publishPrivateMessage', message);
+				self.assets.eventEmitter.emit('publishPrivateMessage', message, id1, id2);
 				responses.created(response, {
 					message: message
 				});
@@ -216,14 +193,20 @@ PrivateMessages.prototype = {
 					{
 						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
 					}
-				] 
+				]
 			},
-			{ messages: [{ time: criteria }] }
+			{ 
+				messages: [{ time: criteria }]
+			}
 			)
-			.sort({ 'messages.time': -1 })
+			.sort({ 'time': -1 })
 			.limit(limit + 1).exec();
 
 		promise.then(function(messages) {
+
+			if ( !messages.length ) {
+				self._checkExistingDialog(response, user, objectId);
+			}
 
 			messages = ( messages.length ) ? messages[0].messages : [];
 
@@ -239,6 +222,44 @@ PrivateMessages.prototype = {
 			});
 		}, function(err) {
 			return helpers.handleDbErrors(err, self.assets.db, response);
+		});
+	},
+
+	_checkExistingDialog: function (response, user, objectId) {
+		mongoModels.models.PrivateMessage.findOne({ 
+			$or: [
+					{
+						$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
+					},
+					{
+						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
+					}
+				]
+		}, function (err, dialog) {
+			if ( err ) {
+				helpers.handleDbErrors(err, self.assets.db, response);
+			}
+
+			if ( !dialog ) {
+				// dialog doesn't exist and it's need to create it
+				mongoModels.models.User.findById(objectId, function (err, interlocutor) {
+					if ( err ) {
+						helpers.handleDbErrors(err, self.assets.db, response);
+					}
+
+					mongoModels.models.PrivateMessage.create({
+						user1: {
+							_id: user._id,
+							name: user.name
+						},
+						user2: {
+							_id: objectId,
+							name: interlocutor.name
+						},
+						messages: []
+					});
+				});
+			}
 		});
 	}
 }

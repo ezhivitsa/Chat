@@ -7,14 +7,21 @@ define(['helpers', 'dataSource'],
 				dateLastMessage: null,
 				dateFirstMessage: new Date(),
 				wrapperSelector: '.messages ul',
-				textareaSelector: 'footer textarea',
-				buttonSelector: 'footer button',
+				textareaSelector: '#message',
+				buttonSelector: 'footer .send-message',
 				loadMoreSelector: '.load-more',
-				messageTemplate: '<div>' +
-									'<span class="author"><a href="/private-messages.html/#$1">$2</a></span>' +
-									'<span class="date">$3</span>' +
-								  '</div>' +
-								  '<div class="message">$4</div>'
+				messageTemplate: '<core-item icon="account-circle">' +
+									'<div flex>'+
+										'<a class="message-author" href="/private-messages.html/#$1" target="_self">$2</a>'+
+										'<div class="date">$3</div>'+
+										'<div class="message-text">$4</div>'+
+									'</div>'+
+								 '</core-item>'
+				// messageTemplate: '<div>' +
+				// 					'<span class="author"><a href="/private-messages.html/#$1">$2</a></span>' +
+				// 					'<span class="date">$3</span>' +
+				// 				  '</div>' +
+				// 				  '<div class="message">$4</div>'
 			};
 
 			this.init();

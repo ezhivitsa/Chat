@@ -3,21 +3,38 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+	<script src="bower_components/platform/platform.js"></script>
+
 	<link rel="stylesheet" href="/css/main.css" />
+	<link rel="import" href="bower_components/paper-button/paper-button.html">
+	<link rel="import" href="bower_components/paper-input/paper-input.html">
+	<link rel="import" href="bower_components/paper-shadow/paper-shadow.html">
+	<link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+	<link rel="import" href="bower_components/paper-item/paper-item.html">
+
+	<link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+	<link rel="import" href="bower_components/core-item/core-item.html">
+
 	<title>Chat</title>
 </head>
 <body class="main">
 	<header>
-		<div class="name"><a href="/user.html"></a></div>
-		<div class="private-messages-count"><a href="/private-messages.html">Dialogs</a></div>
+		<core-toolbar>
+			<paper-menu-button icon="menu" id="menu">
+				<paper-item label="Change name" class="menu-item"><a href="/user.html"></a></paper-item>
+				<paper-item label="Dialogs" class="menu-item"><a href="/private-messages.html"></a></paper-item>
+			</paper-menu-button>
+			<div class="name" flex>Title</div>
+			<core-icon-button icon="more" on-tap="{{moreAction}}"></core-icon-button>
+		</core-toolbar>
 	</header>
 	<section class="messages">
-		<button class="load-more">Load more messages</button>
-		<ul></ul>
+		<paper-button class="load-more"><paper-shadow z="2">Load more messages</paper-shadow></paper-button>
+		<ul class="public-messages"></ul>
 	</section>
 	<footer>
-		<textarea id="message"></textarea>
-		<button>Send message</button>
+		<paper-input multiline label="Enter your message" id="message"></paper-input>
+		<paper-button class="send-message"><paper-shadow z="1">Send message</paper-shadow></paper-button>
 	</footer>
 	<script data-main="/scripts/main.min.js" src="/bower_components/requirejs/require.js"></script>
 </body>

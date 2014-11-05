@@ -16,6 +16,7 @@ function PrivateMessages(db, eventEmitter) {
 	};
 
 	this.res = {};
+	this.init();
 }
 
 PrivateMessages.prototype = {
@@ -25,22 +26,21 @@ PrivateMessages.prototype = {
 	init: function () {
 		var self = this;
 
-		self.assets.eventEmitter.on('publishPrivateMessage', function (message, user1, user2) {
-			console.log(user1);
-			console.log(user2);
-
-			self._sendMessageToUser(user1);
-			self._sendMessageToUser(user2);
+		self.assets.eventEmitter.on('publishPrivateMessage', function (data) {
+			self._sendMessageToUser(data.message, data.id1, data.id2);
+			self._sendMessageToUser(data.message, data.id2, data.id1);
 		});
 	},
 
-	_sendMessageToUser: function (id) {
-		if ( self.res.id ) {
-			responses.ok(self.res.id, { 
+	_sendMessageToUser: function (message, id1, id2) {
+		var self = this;
+
+		if ( self.res[id1] && self.res[id1][id2] ) {
+			responses.ok(self.res[id1][id2], { 
 				messages: [message]
 			});
 			
-			self.res.id = null;
+			self.res[id1][id2] = null;
 		}
 	},
 
@@ -108,24 +108,22 @@ PrivateMessages.prototype = {
 			isRead: false
 		};
 
-		self.assets.eventEmitter.emit('publishPrivateMessage', message, id1, id2);
+		self._updateDialog(response, message, user._id, objectId);
+		// mongoModels.models.PrivateMessage.findOne({ 
+		// 	$or: [
+		// 			{
+		// 				$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
+		// 			},
+		// 			{
+		// 				$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
+		// 			}
+		// 		]
+		// }, function (err, dialog) {
+		// 	if ( err ) {
+		// 		helpers.handleDbErrors(err, self.assets.db, response);
+		// 	}
 
-		mongoModels.models.PrivateMessage.findOne({ 
-			$or: [
-					{
-						$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
-					},
-					{
-						$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
-					}
-				]
-		}, function (err, dialog) {
-			if ( err ) {
-				helpers.handleDbErrors(err, self.assets.db, response);
-			}
-
-			self._updateDialog(response, message, user._id, objectId);
-		});		
+		// });		
 	},
 
 	_updateDialog: function (response, message, id1, id2) {
@@ -154,7 +152,12 @@ PrivateMessages.prototype = {
 				}
 
 				// trigger event of send private message
-				self.assets.eventEmitter.emit('publishPrivateMessage', message, id1, id2);
+				self.assets.eventEmitter.emit('publishPrivateMessage', { 
+					message: message, 
+					id1: id1, 
+					id2: id2
+				});
+
 				responses.created(response, {
 					message: message
 				});

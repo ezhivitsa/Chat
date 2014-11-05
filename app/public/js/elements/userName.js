@@ -3,7 +3,7 @@ define(['dataSource', 'helpers'],
 		function UserName (options) {
 			this.defaults = {
 				parentSelector: "header",
-				elementSelector: ".name a",
+				elementSelector: ".name",
 				inputSelector: '#name',
 				buttonSelector: 'button.change',
 				errorSelector: '.error'

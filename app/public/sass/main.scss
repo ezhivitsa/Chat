@@ -1,10 +1,26 @@
 @import '../bower_components/normalize.scss/normalize';
 
 header {
-	height: 80px;
+	margin-bottom: 20px;
+
+	#menu {
+		.menu-item {
+			background: #ccc;
+			margin: 2px 0;
+		}
+	}
 }
 
 section {
+	padding: 0 40px;
+	box-sizing: border-box;
+
+	.load-more {
+	    background: #4285f4;
+	    color: #fff;
+	    font-size: 14px;
+	}
+
 	.error {
 		color: #E42323;
 		display: none;
@@ -12,5 +28,47 @@ section {
 
 	.interlocutor {
 		display: none;
+	}
+
+	ul {
+		list-style-type: none;
+		max-width: 450px;
+		padding: 0;
+		margin: 10px 0;
+
+		&.public-messages {
+			.message-author {
+				display: inline-block;
+				width: 200px;
+				color: #000;
+				text-decoration: none;
+				font-weight: bold;
+			}
+
+			.message-author:hover {
+				text-decoration: underline;
+			}
+
+			.date {
+				display: inline-block;
+			}
+		}
+
+		li {
+			padding: 0;
+			display: inline-block;
+		}
+	}
+
+	border-bottom: 1px solid #ccc;
+}
+
+footer {
+	padding: 0 40px;
+
+	.send-message {
+		background: #3f51b5;
+		color: #fff;
+		font-size: 14px;
 	}
 }

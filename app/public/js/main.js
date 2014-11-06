@@ -1,5 +1,5 @@
-define(['pages/main', 'pages/privateMessages', 'pages/user'], 
-	function (MainPage, PrivateMessagesPage, UserPage) {
+define(['pages/main', 'pages/privateMessages', 'pages/user','elements/geolocation'], 
+	function (MainPage, PrivateMessagesPage, UserPage, Geolocation) {
 		var pages = {
 			'main': MainPage,
 			'private-messages': PrivateMessagesPage,
@@ -20,6 +20,7 @@ define(['pages/main', 'pages/privateMessages', 'pages/user'],
 			return;
 		}
 
-		var page = new currentPage();
+		var page = new currentPage(),
+			geo = new Geolocation();
 	}
 );

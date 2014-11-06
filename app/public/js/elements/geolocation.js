@@ -1,5 +1,5 @@
-define(['dataSource', 'helpers'],
-	function(DataSource, Helpers) {
+define(['dataSource'],
+	function(DataSource) {
 
 		function Geolocation() {
 			this.attempt = 0;
@@ -19,7 +19,7 @@ define(['dataSource', 'helpers'],
 					DataSource.publishLocation({
 						lat: position.coords.latitude,
 						long: position.coords.longitude
-					},function() {
+					}, function() {
 						self.updateLocation.call(self);
 					})
 				}, function(err) {
@@ -36,7 +36,7 @@ define(['dataSource', 'helpers'],
 				var self = this;
 				setTimeout(function() {
 					self.getLocation.call(self);
-				},1800000);
+				}, 1800000);
 			}
 		};
 

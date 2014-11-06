@@ -1,74 +1,102 @@
 @import '../bower_components/normalize.scss/normalize';
 
-header {
-	margin-bottom: 20px;
+header
+{
+    margin-bottom: 20px;
+    #menu
+    {
+        .menu-item
+        {
+            margin: 2px 0;
 
-	#menu {
-		.menu-item {
-			background: #ccc;
-			margin: 2px 0;
-		}
-	}
+            background: #ccc;
+        }
+    }
 }
 
-section {
-	padding: 0 40px;
-	box-sizing: border-box;
+section
+{
+    box-sizing: border-box;
+    padding: 0 40px;
 
-	.load-more {
-	    background: #4285f4;
-	    color: #fff;
-	    font-size: 14px;
-	}
+    border-bottom: 1px solid #ccc;
+    .load-more
+    {
+        font-size: 14px;
 
-	.error {
-		color: #E42323;
-		display: none;
-	}
+        color: #fff;
+        background: #4285f4;
+    }
+    .error
+    {
+        display: none;
 
-	.interlocutor {
-		display: none;
-	}
+        color: #e42323;
+    }
+    .interlocutor
+    {
+        display: none;
+    }
+    ul
+    {
+        max-width: 450px;
+        margin: 10px 0;
+        padding: 0;
 
-	ul {
-		list-style-type: none;
-		max-width: 450px;
-		padding: 0;
-		margin: 10px 0;
+        list-style-type: none;
+        &.public-messages
+        {
+            .message-author
+            {
+                font-weight: bold;
 
-		&.public-messages {
-			.message-author {
-				display: inline-block;
-				width: 200px;
-				color: #000;
-				text-decoration: none;
-				font-weight: bold;
-			}
+                display: inline-block;
 
-			.message-author:hover {
-				text-decoration: underline;
-			}
+                width: 200px;
 
-			.date {
-				display: inline-block;
-			}
-		}
+                text-decoration: none;
 
-		li {
-			padding: 0;
-			display: inline-block;
-		}
-	}
+                color: #000;
+            }
+            .message-author:hover
+            {
+                text-decoration: underline;
+            }
+            .date
+            {
+                display: inline-block;
+            }
+        }
+        li
+        {
+            display: inline-block;
 
-	border-bottom: 1px solid #ccc;
+            padding: 0;
+        }
+    }
 }
 
-footer {
-	padding: 0 40px;
+footer
+{
+    padding: 0 40px;
+    .send-message
+    {
+        font-size: 14px;
 
-	.send-message {
-		background: #3f51b5;
-		color: #fff;
-		font-size: 14px;
-	}
+        color: #fff;
+        background: #3f51b5;
+    }
+}
+
+.locations
+{
+    header
+    {
+        margin-bottom: 0;
+    }
+    #users-map
+    {
+        width: 100%;
+        height: 400px;
+    }
 }

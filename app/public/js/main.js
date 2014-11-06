@@ -1,9 +1,10 @@
-define(['pages/main', 'pages/privateMessages', 'pages/user','elements/geolocation'], 
-	function (MainPage, PrivateMessagesPage, UserPage, Geolocation) {
+define(['pages/main', 'pages/privateMessages', 'pages/user','pages/userLoactions','elements/geolocation'], 
+	function (MainPage, PrivateMessagesPage, UserPage, UsersLocationsPage, Geolocation) {
 		var pages = {
 			'main': MainPage,
 			'private-messages': PrivateMessagesPage,
-			'user': UserPage
+			'user': UserPage,
+			'locations': UsersLocationsPage
 		};
 
 		var body = document.querySelector('body'),

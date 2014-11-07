@@ -10,18 +10,13 @@ define(['helpers', 'dataSource'],
 				textareaSelector: '#message',
 				buttonSelector: 'footer .send-message',
 				loadMoreSelector: '.load-more',
-				messageTemplate: '<core-item icon="account-circle">' +
+				messageTemplate: '<core-item icon="input">' +
 									'<div flex>'+
 										'<a class="message-author" href="/private-messages.html/#$1" target="_self">$2</a>'+
 										'<div class="date">$3</div>'+
 										'<div class="message-text">$4</div>'+
 									'</div>'+
 								 '</core-item>'
-				// messageTemplate: '<div>' +
-				// 					'<span class="author"><a href="/private-messages.html/#$1">$2</a></span>' +
-				// 					'<span class="date">$3</span>' +
-				// 				  '</div>' +
-				// 				  '<div class="message">$4</div>'
 			};
 
 			this.init();
@@ -88,13 +83,15 @@ define(['helpers', 'dataSource'],
 		PublicMessages.prototype._addMessageOnPage = function (respMes, position) {
 			position = position || 'append';
 
-			var li = document.createElement('li');
+			var li = document.createElement('li'),
+				messageTime = new Date(respMes.time),
+				time = messageTime.getDay() + '.' + (messageTime.getMonth() + 1) + '.' + messageTime.getFullYear(); 
 
 			li.innerHTML = 
 				this.opts.messageTemplate
 					.replace('$1', respMes.author._id)
 					.replace('$2', respMes.author.name)
-					.replace('$3', respMes.time)
+					.replace('$3', time)
 					.replace('$4', respMes.message);
 
 			if ( position === 'append' ) {

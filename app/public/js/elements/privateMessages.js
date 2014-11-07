@@ -7,14 +7,19 @@ define(['dataSource', 'helpers'],
 				loadMoreSelector: '.load-more',
 				wrapperSelector: 'section ul',
 				textareaSelector: '#message',
-				buttonSelector: 'footer button',
+				buttonSelector: 'footer .send-message',
 				interlocutorSelector: '.interlocutor',
 				limit: 10,
 				isEnd: false,
 				dateLastMessage: null,
 				dateFirstMessage: new Date(),
-				commonDialogTemplate: '<li><a href="/private-messages.html/#$1">$2</a> <span>Number of messages: $3</span></li>',
-				dialogTemplate: '<li class="$1"><span class="message">$2</span></li>'
+				commonDialogTemplate: '<li><core-item icon="account-circle">' +
+										'<div flex>'+
+											'<a class="message-author" href="/private-messages.html/#$1" target="_self">$2</a>'+
+											'<div class="number-of-messages">Number of messages: $3</div>'+
+										'</div>'+
+									 '</core-item></li>',
+				dialogTemplate: '<span class="message"><paper-shadow z="1">$2</paper-shadow></span>'
 			};
 
 			this.init();
@@ -90,9 +95,12 @@ define(['dataSource', 'helpers'],
 
 			var li = document.createElement('li');
 
+			if ( respMes.sender ) {
+				li.className = 'my';
+			}
+
 			li.innerHTML = 
 				this.opts.dialogTemplate
-					.replace('$1', respMes.sender ? 'my' : '')
 					.replace('$2', respMes.message);
 
 			if ( position === 'append' ) {
@@ -120,22 +128,13 @@ define(['dataSource', 'helpers'],
 			});
 		}
 
-		PrivateMessages.prototype.hideLoadMore = function () {
-			this.opts.loadMore.style.display = "none";
-		}
-
-		PrivateMessages.prototype.hideHideTextarea = function () {
-			this.opts.textarea.style.display = "none";
-			this.opts.button.style.display = "none";
-		}
-
 		PrivateMessages.prototype.appendInterlocutorName = function () {
 			var self = this,
 				id = (window.location.hash) ? window.location.hash.substring(1) : '';
 
 			DataSource.getUserNameById(id, function (response, status) {
 				if ( status == 200 ) {
-					self.opts.interlocutor.innerHTML = response.user.name;
+					self.opts.interlocutor.innerHTML += response.user.name;
 				}
 			});
 		}

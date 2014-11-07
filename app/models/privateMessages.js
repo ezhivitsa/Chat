@@ -109,21 +109,6 @@ PrivateMessages.prototype = {
 		};
 
 		self._updateDialog(response, message, user._id, objectId);
-		// mongoModels.models.PrivateMessage.findOne({ 
-		// 	$or: [
-		// 			{
-		// 				$and: [{'user1._id': user._id}, {'user2._id': objectId} ]
-		// 			},
-		// 			{
-		// 				$and: [{'user1._id': objectId}, {'user2._id': user._id} ],
-		// 			}
-		// 		]
-		// }, function (err, dialog) {
-		// 	if ( err ) {
-		// 		helpers.handleDbErrors(err, self.assets.db, response);
-		// 	}
-
-		// });		
 	},
 
 	_updateDialog: function (response, message, id1, id2) {
@@ -206,14 +191,16 @@ PrivateMessages.prototype = {
 
 		promise.then(function(privateMessages) {
 
-			if ( !privateMessages.length ) {
-				self._checkExistingDialog(response, user, objectId);
-			}
-
 			var time = (data.time) ? new Date(data.time).getTime() : Date.now(),
+				messages = null;
+			
+			if ( !privateMessages ) {
+				self._checkExistingDialog(response, user, objectId);
+				messages = [];
+			}
+			else {
 				messages = ( privateMessages.messages.length ) ? privateMessages.messages : [];
-
-			//console.log(messages)
+			}
 
 			messages = messages.filter(function (message) {
 				return message.time.getTime() < time;

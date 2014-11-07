@@ -5,7 +5,7 @@ define(['dataSource', 'helpers'],
 				parentSelector: "header",
 				elementSelector: ".name",
 				inputSelector: '#name',
-				buttonSelector: 'button.change',
+				buttonSelector: '.change',
 				errorSelector: '.error'
 			};
 

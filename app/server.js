@@ -42,7 +42,7 @@ server.get('publicMessages', function (request, response, data, session) {
 
 server.post('publicMessages/message', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
-	user.authorization()
+	user.authorization(true)
 		.then(function(currentUser) {
 			publicMessages.publish(response, data, currentUser);
 		});
@@ -66,7 +66,7 @@ server.get('dialogs/all', function (request, response, data, session) {
 
 server.post('dialogs/dialog/id/{id}', function (request, response, data, session) {
 	var user = new User(db, request, response, session, data);
-	user.authorization()
+	user.authorization(true)
 		.then(function(currentUser) {
 			privateMessages.publish(response, db, data, currentUser);
 		});

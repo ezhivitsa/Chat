@@ -38,7 +38,7 @@ User.prototype.init = function(opts) {
 	helpers.setShemaData(this.schema, this, opts);
 };
 
-User.prototype.authorization = function(opts) {
+User.prototype.authorization = function(isActivity) {
 	var self = this,
 		resolver = Promise.defer();
 
@@ -53,17 +53,32 @@ User.prototype.authorization = function(opts) {
 		promise.then(function(user) {
 			if (!user || user.token != token) {
 				// user was not found or some anouther user already use this account
-				self.setIdAndToken(null, null);
 				self.registerNew(resolver);
 			} else {
 				// user identified
-				self.setIdAndToken(user._id, user.token);
 				self.name = user.name;
 				if (typeof self.lat == "number" && typeof self.long == "number") {
 					user.geolocation.lat = self.lat;
 					user.geolocation.long = self.long;
 				}
-				resolver.resolve(user);
+
+				if ( isActivity ) {
+					// changing token and updating last activity
+					createToken()(48)
+						.then(function(buf) {
+							var newToken = buf.toString('hex');
+							self.setIdAndToken(id, newToken);
+
+							user.set('token', newToken);
+							user.set('lastActivity', new Date())
+							user.save(function () {
+								resolver.resolve(user);
+							});
+						});
+				}
+				else {
+					resolver.resolve(user);
+				}
 			}
 		}, function(err) {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
@@ -92,7 +107,7 @@ User.prototype.registerNew = function(resolver) {
 
 				createPromise.then(function(user) {
 					// adding id and token to the user sessiom cookie
-					self.setIdAndToken(user._id, user.token);
+					self.setIdAndToken(user._id.toString(), user.token);
 					resolver.resolve(user);
 				});
 			}, function(err) {
@@ -126,7 +141,6 @@ User.prototype.updateUserInfo = function(opts, callback) {
 	createToken()(48)
 		.then(function(buf) {
 			var token = buf.toString('hex'),
-				numUpdates = 0,
 				updates = helpers.extend({
 					token: token,
 					lastActivity: Date.now()
@@ -141,35 +155,35 @@ User.prototype.updateUserInfo = function(opts, callback) {
 					}
 
 					self.setIdAndToken(id, token);
-					numUpdates++;
-					if (numUpdates == 2) {
-						(callback) && callback(updates.name);
-					}
+					(callback) && callback(updates.name);
 				});
 
 			if (updates.name) {
-				mongoModels.models.PublicMessage.update({
-						'author._id': objectId
-					}, {
-						$set: {
-							"author.name": updates.name
-						}
-					}, {
-						multi: true
-					},
-					function(err, messages) {
-						if (err) {
-							return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
-						}
-
-						numUpdates++;
-						if (numUpdates == 2) {
-							(callback) && callback(updates.name);
-						}
-					}
-				);
+				self._updateName('PublicMessage', 'author._id', "author.name", objectId, updates.name);
+				self._updateName('PrivateMessage', 'user1._id', "user1.name", objectId, updates.name);
+				self._updateName('PrivateMessage', 'user2._id', "user2.name", objectId, updates.name);				
 			}
 		});
+}
+
+User.prototype._updateName = function (model, idSelector, nameSelector, id, name) {
+	var self = this,
+		finder = {},
+		setter = {};
+
+	finder[idSelector] = id;
+	setter[nameSelector] = name;
+
+	mongoModels.models[model].update(
+		finder,
+		{ $set: setter },
+		{ multi: true },
+		function(err, messages) {
+			if (err) {
+				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
+			}
+		}
+	);
 }
 
 User.prototype.updateGeolocation = function() {
@@ -213,12 +227,12 @@ User.prototype.updateName = function(name) {
 			}, function(newName) {
 				// 200 ok updated
 				responses.ok(self.assets.response, {
-					name: newName
+					name: self.name
 				});
 			});
 		} else {
 			// account with such name already created
-			if (user.lastActivity.getTime() + ONE_HOUR > new Date()) {
+			if (new Date(user.lastActivity).getTime() + ONE_HOUR > Date.now()) {
 				// not possible to use this name
 				responses.forbidden(self.assets.response, "This name is already in use");
 			} else {

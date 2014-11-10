@@ -238,9 +238,9 @@ User.prototype.updateName = function(name) {
 			} else {
 				self.assets.request.csession['id'] = user._id;
 				self.id = user._id;
-				self.updateUserInfo({}, function(newName) {
+				self.updateUserInfo({}, function() {
 					responses.ok(self.assets.response, {
-						name: newName
+						name: self.name
 					});
 				});
 			}

@@ -53,10 +53,10 @@ section
     ul
     {
         position: absolute;
-        padding: 64px 0 113px;
+        top: 64px;
+        bottom: 113px;
+        padding: 0;
         box-sizing: border-box;
-        top: 0;
-        height: 100%;
         max-width: 450px;
         margin: 0;
         overflow: auto;
@@ -100,33 +100,44 @@ section
     }
 }
 
-.private-messages section ul {
-    max-width: none;
-    width: 100%;
 
-    li {
-        clear: both;
-        overflow: hidden;
-        display: block;
-        
-        &.my {
-            span {
-                float: left;
-            }
-        }
+.private-messages {
+	.refresh {
+		display: none;
+	}
 
-        span {
-            display: inline-block;
-            float: right;
-            padding: 5px;
-            background: #fff;
-            margin: 5px;
-            border-radius: 4px;
-        }
-    }
+	section ul {
+	    max-width: none;
+	    width: 100%;
+
+	    li {
+	        clear: both;
+	        overflow: hidden;
+	        display: block;
+	        
+	        &.my {
+	            span {
+	                float: left;
+	            }
+	        }
+
+	        span {
+	            display: inline-block;
+	            float: right;
+	            padding: 5px;
+	            background: #fff;
+	            margin: 5px;
+	            border-radius: 4px;
+	        }
+	    }
+	}
 }
 
 .dialogs {
+	.refresh {
+		display: block;
+	}
+
     ul {
         padding-bottom: 0;
         width: 100%;
@@ -135,6 +146,10 @@ section
     footer {
         display: none;
     }
+}
+
+.user section {
+	padding-top: 74px;
 }
 
 footer

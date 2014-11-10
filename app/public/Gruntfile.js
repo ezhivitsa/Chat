@@ -16,7 +16,6 @@ module.exports = function (grunt) {
 		requirejs: {
 			compile: {
 				options: {
-					optimize: "none",
 					name: 'main',
 					include: ['config'],
 					// baseUrl: "",

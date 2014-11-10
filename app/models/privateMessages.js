@@ -27,15 +27,18 @@ PrivateMessages.prototype = {
 		var self = this;
 
 		self.assets.eventEmitter.on('publishPrivateMessage', function (data) {
-			self._sendMessageToUser(data.message, data.id1, data.id2);
-			self._sendMessageToUser(data.message, data.id2, data.id1);
+			var sender = data.message.sender;
+			self._sendMessageToUser(data.message, data.id1, data.id2, sender);
+			self._sendMessageToUser(data.message, data.id2, data.id1, sender);
 		});
 	},
 
-	_sendMessageToUser: function (message, id1, id2) {
+	_sendMessageToUser: function (message, id1, id2, sender) {
 		var self = this;
 
 		if ( self.res[id1] && self.res[id1][id2] ) {
+			message.sender = (id1.toString() === sender._id.toString());
+
 			responses.ok(self.res[id1][id2], { 
 				messages: [message]
 			});

@@ -14,8 +14,7 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 			}
 			else {
 				// show all dialogs
-				privateMessages.hideLoadMore();
-				privateMessages.hideHideTextarea();
+				document.querySelector('body').classList.add('dialogs');
 				privateMessages.appendAllDialogs();
 			}
 		}

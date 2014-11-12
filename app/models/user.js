@@ -62,7 +62,7 @@ User.prototype.authorization = function(isActivity) {
 					user.geolocation.long = self.long;
 				}
 
-				if ( isActivity ) {
+				if (isActivity) {
 					// changing token and updating last activity
 					createToken()(48)
 						.then(function(buf) {
@@ -71,12 +71,11 @@ User.prototype.authorization = function(isActivity) {
 
 							user.set('token', newToken);
 							user.set('lastActivity', new Date())
-							user.save(function () {
+							user.save(function() {
 								resolver.resolve(user);
 							});
 						});
-				}
-				else {
+				} else {
 					resolver.resolve(user);
 				}
 			}
@@ -161,12 +160,12 @@ User.prototype.updateUserInfo = function(opts, callback) {
 			if (updates.name) {
 				self._updateName('PublicMessage', 'author._id', "author.name", objectId, updates.name);
 				self._updateName('PrivateMessage', 'user1._id', "user1.name", objectId, updates.name);
-				self._updateName('PrivateMessage', 'user2._id', "user2.name", objectId, updates.name);				
+				self._updateName('PrivateMessage', 'user2._id', "user2.name", objectId, updates.name);
 			}
 		});
 }
 
-User.prototype._updateName = function (model, idSelector, nameSelector, id, name) {
+User.prototype._updateName = function(model, idSelector, nameSelector, id, name) {
 	var self = this,
 		finder = {},
 		setter = {};
@@ -175,9 +174,11 @@ User.prototype._updateName = function (model, idSelector, nameSelector, id, name
 	setter[nameSelector] = name;
 
 	mongoModels.models[model].update(
-		finder,
-		{ $set: setter },
-		{ multi: true },
+		finder, {
+			$set: setter
+		}, {
+			multi: true
+		},
 		function(err, messages) {
 			if (err) {
 				return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
@@ -205,6 +206,25 @@ User.prototype.updateGeolocation = function() {
 			return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 		}
 		responses.ok(self.assets.response)
+	});
+};
+
+User.prototype.getGeolocations = function() {
+	var self = this;
+
+	var promise = mongoModels.models.User.find({}).exec();
+
+	promise.then(function(users) {
+		var res = [];
+		for (var user in users) {
+			res.push({
+				name: user.name,
+				geolocation: user.geolocation
+			})
+		}
+		responses.ok(self.assets.response, res);
+	}, function(err) {
+		return helpers.handleDbErrors(err, self.assets.db, self.assets.response);
 	});
 };
 

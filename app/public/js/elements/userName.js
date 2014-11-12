@@ -22,12 +22,13 @@ define(['dataSource', 'helpers'],
 			this.opts.error = document.querySelector(this.opts.errorSelector);
 		}
 
-		UserName.prototype.appendName = function () {
+		UserName.prototype.appendName = function (callback) {
 			var self = this;
 
 			DataSource.getUserName(function (response, status) {
 				if ( status == 200 ) {
 					self.opts.element.innerHTML = response.name;
+					callback && callback(response.name);
 				}
 			});
 		}

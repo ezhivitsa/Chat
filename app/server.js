@@ -7,7 +7,10 @@ var HttpServer = require('./httpServer'),
 	PrivateMessages = require('./models/privateMessages'),
 	events = require('events');
 
-var server = new HttpServer(),
+var server = new HttpServer({
+		host: '192.168.1.147',
+		port: 80
+	}),
 	eventEmitter = new events.EventEmitter(),
 	db = new Db(),
 	publicMessages = new PublicMessages(db, eventEmitter),

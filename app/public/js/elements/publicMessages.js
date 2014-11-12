@@ -12,7 +12,7 @@ define(['helpers', 'dataSource'],
 				loadMoreSelector: '.load-more',
 				messageTemplate: '<core-item icon="input">' +
 									'<div flex>'+
-										'<a class="message-author" href="/private-messages.html/#$1" target="_self">$2</a>'+
+										'<a class="message-author" href="private-messages.html?id=$1" target="_self">$2</a>'+
 										'<div class="date">$3</div>'+
 										'<div class="message-text">$4</div>'+
 									'</div>'+

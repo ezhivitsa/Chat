@@ -4,7 +4,7 @@ define(['elements/header', 'elements/userName', 'elements/privateMessages'],
 			var header = new Header(),
 				privateMessages = new PrivateMessages();
 
-			if ( window.location.hash ) {
+			if ( window.location.href.indexOf('?id') + 1 ) {
 				// show interlocutor info and dialog with him
 				privateMessages.appendInterlocutorName();
 				privateMessages.loadOldMessages();

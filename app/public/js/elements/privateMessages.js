@@ -15,7 +15,7 @@ define(['dataSource', 'helpers'],
 				dateFirstMessage: new Date(),
 				commonDialogTemplate: '<li><core-item icon="account-circle">' +
 										'<div flex>'+
-											'<a class="message-author" href="/private-messages.html/#$1" target="_self">$2</a>'+
+											'<a class="message-author" href="private-messages.html?id=$1" target="_self">$2</a>'+
 											'<div class="number-of-messages">Number of messages: $3</div>'+
 										'</div>'+
 									 '</core-item></li>',
@@ -35,6 +35,10 @@ define(['dataSource', 'helpers'],
 			this.opts.textarea = document.querySelector(this.opts.textareaSelector);
 			this.opts.button = document.querySelector(this.opts.buttonSelector);
 			this.opts.interlocutor = document.querySelector(this.opts.interlocutorSelector);
+
+			if ( window.location.href.indexOf('?id') + 1 ) {
+				this.opts.id = window.location.href.match(/id=(.+)/)[1];
+			}
 		}
 
 		PrivateMessages.prototype.appendCount = function () {
@@ -65,11 +69,10 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.loadOldMessages = function (methodInsert) {
-			var self = this,
-				id = window.location.hash.substring(1);
+			var self = this;
 
 			if ( !self.opts.isEnd ) {
-				DataSource.getDialog(id, this.opts.dateLastMessage, -this.opts.limit, function (response, status) {
+				DataSource.getDialog(self.opts.id, this.opts.dateLastMessage, -this.opts.limit, function (response, status) {
 					if ( status == 200 ) {
 						var len = response.messages.length;
 						if ( methodInsert === 'prepand' ) {
@@ -118,10 +121,9 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.appendDialogMessages = function () {
-			var self = this,
-				id = window.location.hash;
+			var self = this;
 
-			DataSource.getDialog(id, self.opts.dateLastMessage, self.opts.limit, function (response, status) {
+			DataSource.getDialog(self.opts.id, self.opts.dateLastMessage, self.opts.limit, function (response, status) {
 				if ( status == 200 ) {
 
 				}
@@ -129,10 +131,9 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.appendInterlocutorName = function () {
-			var self = this,
-				id = (window.location.hash) ? window.location.hash.substring(1) : '';
+			var self = this;
 
-			DataSource.getUserNameById(id, function (response, status) {
+			DataSource.getUserNameById(self.opts.id, function (response, status) {
 				if ( status == 200 ) {
 					self.opts.interlocutor.innerHTML += response.user.name;
 				}
@@ -140,13 +141,12 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.listenAddMessage = function () {
-			var self = this,
-				id = window.location.hash.substring(1);
+			var self = this;
 
 			this.opts.button.addEventListener('click', function () {
 				var text = self.opts.textarea.value;
 				if ( text ) {
-					DataSource.publishPrivateMessage(id, text, function (response, status) {
+					DataSource.publishPrivateMessage(self.opts.id, text, function (response, status) {
 						if ( status == 201 ) {
 							//self._addMessageOnPage(response.message);
 							self.opts.textarea.value = '';
@@ -157,10 +157,9 @@ define(['dataSource', 'helpers'],
 		}
 
 		PrivateMessages.prototype.listenChat = function () {
-			var self = this,
-				id = window.location.hash.substring(1);
+			var self = this;
 
-			DataSource.getDialog(id, self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
+			DataSource.getDialog(self.opts.id, self.opts.dateFirstMessage, this.opts.limit, function (response, status) {
 				if ( status == 200 ) {
 					var len = response.messages.length;
 					for ( var i = len - 1; i >= 0 ; i-- ) {

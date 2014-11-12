@@ -170,6 +170,9 @@ footer
 
 .locations
 {
+    padding-top: 64px;
+    box-sizing: border-box;
+
     header
     {
         margin-bottom: 0;
@@ -177,6 +180,12 @@ footer
     #users-map
     {
         width: 100%;
-        height: 400px;
+        height: 100%;
+    }
+}
+
+.locations-html {
+    &, body {
+        height: 100%;
     }
 }

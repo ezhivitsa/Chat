@@ -10,7 +10,8 @@ define([],
 				message: domain + 'publicMessages/message',
 				userUpdate: domain + 'user/update',
 				dialogs: domain + 'dialogs/all',
-				dialog: domain + 'dialogs/dialog/id/$1'
+				dialog: domain + 'dialogs/dialog/id/$1',
+				locations: domain + 'geolocations'
 			};
 
 		function createHttpGet(url, callback) {
@@ -89,7 +90,10 @@ define([],
 			},
 			publishLocation: function(location, callback) {
 				createHttpPost(location, urlPatterns.userLoaction, callback);
-			}
+			},
+			getUsersLocations: function(callback) {
+				createHttpGet(urlPatterns.locations, callback);
+			},
 		};
 	}
 );

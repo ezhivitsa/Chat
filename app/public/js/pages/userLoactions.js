@@ -23,7 +23,26 @@ define(['dataSource', 'helpers'],
 
 				this.userLocationsMap = document.getElementById(this.opts.mapId);
 
-				var map = new google.maps.Map(this.userLocationsMap, this.opts.mapOptions);
+				this.map = new google.maps.Map(this.userLocationsMap, this.opts.mapOptions);
+				this.addUsersMarkers();
+
+			},
+
+			addUsersMarkers: function() {
+				var self = this;
+				DataSource.getUsersLocations(function(resp, status) {
+					if (status == 200) {
+						for (var user in resp) {
+							(new google.maps.Marker({
+								position: new google.maps.LatLng(resp[user].geolocation.lat, resp[user].geolocation.long),
+								map: self.map,
+								title: resp[user].name
+							}));
+						}
+					} else {
+						alert("Impossible to identify users locations");
+					}
+				});
 			}
 		}
 

@@ -218,8 +218,8 @@ User.prototype.getGeolocations = function() {
 		var res = [];
 		for (var user in users) {
 			res.push({
-				name: user.name,
-				geolocation: user.geolocation
+				name: users[user].name,
+				geolocation: users[user].geolocation
 			})
 		}
 		responses.ok(self.assets.response, res);

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.chat" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Chat</name>
+    <description>Chat with strong server on node.js, database mongodb and client which write using module pattern of programming on require.js.</description>
+    <author email="j.zhivitsa@gmail.com" href="http://cordova.io">
+        Evgeny Zhivitsa and Evgeny Potockiy
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <preference name="Orientation" value="portrait" />
+</widget>

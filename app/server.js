@@ -8,7 +8,7 @@ var HttpServer = require('./httpServer'),
 	events = require('events');
 
 var server = new HttpServer({
-		host: '192.168.1.147',
+		host: '192.168.1.91',
 		port: 80
 	}),
 	eventEmitter = new events.EventEmitter(),

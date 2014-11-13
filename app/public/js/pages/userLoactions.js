@@ -1,4 +1,4 @@
-define(['dataSource', 'helpers','elements/header'],
+define(['dataSource', 'helpers', 'elements/header'],
 	function(DataSource, Helpers, Header) {
 
 		function UsersLocationsPage(options) {
@@ -13,7 +13,7 @@ define(['dataSource', 'helpers','elements/header'],
 					mapTypeId: google.maps.MapTypeId.ROADMAP
 				}
 			}
-			header.getName(function (name) {
+			header.getName(function(name) {
 				self._username = name
 				self.init(options);
 			});
@@ -35,16 +35,22 @@ define(['dataSource', 'helpers','elements/header'],
 
 			addUsersMarkers: function() {
 				var self = this;
+				self.infowindow = new google.maps.InfoWindow();
+
 				DataSource.getUsersLocations(function(resp, status) {
 					if (status == 200) {
 						var coords = null;
 						for (var user in resp) {
 							coords = new google.maps.LatLng(resp[user].geolocation.lat, resp[user].geolocation.long);
-							(new google.maps.Marker({
+							var marker = new google.maps.Marker({
 								position: coords,
 								map: self._map,
 								title: resp[user].name
-							}));
+							});
+							google.maps.event.addListener(marker, 'click', function(Av) {
+								self.infowindow.setContent('<div class="info-window-content">' + this.title + '</div>');
+								self.infowindow.open(self._map, this);
+							});
 							if (self._username == resp[user].name) {
 								self._map.setCenter(coords);
 							}

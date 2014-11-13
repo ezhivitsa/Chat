@@ -1,6 +1,6 @@
 define([],
 	function() {
-		var domain = 'http://192.168.1.147/',
+		var domain = 'http://192.168.1.91/',
 			urlPatterns = {
 				user: domain + 'user',
 				userInfo: domain + 'user/id/$1/info',

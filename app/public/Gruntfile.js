@@ -20,7 +20,8 @@ module.exports = function (grunt) {
 					include: ['config'],
 					// baseUrl: "",
 					mainConfigFile: "js/config.js",
-					out: "scripts/main.min.js"
+					out: "scripts/main.min.js",
+					optimize: 'none'
 				}
 			}
 		},

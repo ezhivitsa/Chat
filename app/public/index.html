@@ -30,8 +30,10 @@
 		</core-toolbar>
 	</header>
 	<section class="messages">
-		<paper-button class="load-more"><paper-shadow z="2">Load more messages</paper-shadow></paper-button>
-		<ul class="public-messages"></ul>
+		<div class="scroll-wrapper">
+			<paper-button class="load-more"><paper-shadow z="2">Load more messages</paper-shadow></paper-button>
+			<ul class="public-messages"></ul>
+		</div>
 	</section>
 	<footer>
 		<paper-input multiline label="Enter your message" id="message"></paper-input>

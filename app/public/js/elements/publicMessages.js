@@ -6,7 +6,7 @@ define(['helpers', 'dataSource'],
 				isEnd: false,
 				dateLastMessage: null,
 				animateSteps: 40,
-				aniamteStepDuration: 10,
+				aniamteStepDuration: 3,
 				dateFirstMessage: new Date(),
 				wrapperSelector: '.messages ul',
 				scrollWrapperSelector: '.scroll-wrapper',
@@ -47,14 +47,13 @@ define(['helpers', 'dataSource'],
 							for (var i = 0; i < len; i++) {
 								self._addMessageOnPage(response.messages[i], methodInsert);
 							}
+							var endHeight = self.opts.scrollWrapper.offsetHeight < self.opts.scrollWrapper.scrollHeight ? self.opts.scrollWrapper.scrollHeight : self.opts.scrollWrapper.offsetHeight;
+							self.opts.scrollWrapper.scrollTop = endHeight - startHeight;
 						} else {
 							for (var i = len - 1; i >= 0; i--) {
 								self._addMessageOnPage(response.messages[i], methodInsert);
 							}
-						}
-						var endHeight = self.opts.scrollWrapper.offsetHeight < self.opts.scrollWrapper.scrollHeight ? self.opts.scrollWrapper.scrollHeight : self.opts.scrollWrapper.offsetHeight;
-						if (methodInsert === 'prepand') {
-							self.opts.scrollWrapper.scrollTop = endHeight - startHeight;
+							self.opts.scrollWrapper.scrollTop = self.opts.scrollWrapper.scrollHeight - self.opts.scrollWrapper.offsetHeight;
 						}
 						(len) && (self.opts.dateLastMessage = response.messages[len - 1].time);
 						self.opts.isEnd = response.end;
@@ -69,6 +68,7 @@ define(['helpers', 'dataSource'],
 
 			var submitFunction = function() {
 				var text = self.opts.textarea.value;
+				console.log("submit",text)
 				if (text) {
 					DataSource.publishPublicMessage(text, function(response, status) {
 						if (status == 201) {
@@ -79,12 +79,17 @@ define(['helpers', 'dataSource'],
 				}
 			};
 			this.opts.button.addEventListener('click', submitFunction);
-			this.opts.textarea.addEventListener('keydown', function(e) {
-				if (e.keyCode == 13) {
-					e.preventDefault();
-					submitFunction();
-				}
-			});
+			// this.opts.textarea.addEventListener('keydown', function(e) {
+			// 	console.log("keydown")
+			// 	if (e.keyCode == 13) {
+			// 		console.log("enter")
+			// 		e.preventDefault();
+			// 		var event = document.createEvent("HTMLEvents");
+   //  				event.initEvent("transitionend", true, true);
+   //  				self.opts.textarea.dispatchEvent(event);
+			// 		submitFunction();
+			// 	}
+			// });
 
 		}
 

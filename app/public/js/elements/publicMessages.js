@@ -68,7 +68,7 @@ define(['helpers', 'dataSource'],
 
 			var submitFunction = function() {
 				var text = self.opts.textarea.value;
-				console.log("submit",text)
+				// console.log("submit",text)
 				if (text) {
 					DataSource.publishPublicMessage(text, function(response, status) {
 						if (status == 201) {
@@ -82,11 +82,9 @@ define(['helpers', 'dataSource'],
 			// this.opts.textarea.addEventListener('keydown', function(e) {
 			// 	console.log("keydown")
 			// 	if (e.keyCode == 13) {
-			// 		console.log("enter")
 			// 		e.preventDefault();
-			// 		var event = document.createEvent("HTMLEvents");
-   //  				event.initEvent("transitionend", true, true);
-   //  				self.opts.textarea.dispatchEvent(event);
+			// 		console.log("enter")
+			// 		Platform.flush();
 			// 		submitFunction();
 			// 	}
 			// });

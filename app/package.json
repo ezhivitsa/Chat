@@ -1,10 +1,10 @@
 {
 	"name": "chat",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"devDependencies": {
-		"mongoose": "latest",
-		"cluster": "latest",
-		"client-session": "latest",
-		"bluebird": "latest"
+		"mongoose": "3.8.18",
+		"cluster": "0.7.7",
+		"client-session": "0.1.7",
+		"bluebird": "2.3.10"
 	}
 }

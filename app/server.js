@@ -12,7 +12,13 @@ var server = new HttpServer({
 		port: 80
 	}),
 	eventEmitter = new events.EventEmitter(),
-	db = new Db(),
+	db = new Db({
+		// dbName: 'dbName',
+		// user: 'user',
+		// password: 'password',
+		// host: 'mongo host',
+		// port: 'port in string'
+	}),
 	publicMessages = new PublicMessages(db, eventEmitter),
 	privateMessages = new PrivateMessages(db, eventEmitter);
 

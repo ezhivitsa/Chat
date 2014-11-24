@@ -1,8 +1,8 @@
 {
   "name": "chat",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "dependencies": {
-    "requirejs": "latest",
+    "requirejs": "2.1.15",
     "normalize.scss": "latest",
     "polymer": "Polymer/polymer#0.4.2",
     "paper-elements": "Polymer/paper-elements#~0.4.2",

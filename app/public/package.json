@@ -1,11 +1,11 @@
 {
 	"name": "chat-client",
-	"version": "0.0.1",
+	"version": "1.0.0",
 	"devDependencies": {
-		"grunt"				 	 : "latest",
-		"grunt-contrib-compass"	 : "latest",
-		"grunt-contrib-requirejs": "latest",
-		"grunt-contrib-watch"	 : "latest",
-		"grunt-vulcanize"        : "latest"
+		"grunt"				 	 : "0.4.5",
+		"grunt-contrib-compass"	 : "1.0.1",
+		"grunt-contrib-requirejs": "0.4.4",
+		"grunt-contrib-watch"	 : "0.6.1",
+		"grunt-vulcanize"        : "0.5.0"
 	}
 }
